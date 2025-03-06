@@ -11,7 +11,8 @@ const char* PrimitiveTypeNames[] = {
     "float",
     "bool",
     "str",
-    "Null"
+    "Null",
+    "Invalid Object"
 };
 
 /* //////////////////////  CONSTRUCTORS ////////////////////// */
@@ -27,7 +28,11 @@ int_Object* new_int(int64_t value) {
     obj->base.div = (BinaryOp)div_int;
     obj->base.mod = (BinaryOp)mod_int;
     obj->value = (int64_t) value;
-    
+    obj->bwAND = (BinaryOp)bitwise_AND;
+    obj->bwXOR = (BinaryOp)bitwise_XOR;
+    obj->bwOR = (BinaryOp)bitwise_OR;
+    obj->bwRSHIFT = (BinaryOp)bitwise_RSHIFT;
+    obj->bwLSHIFT = (BinaryOp)bitwise_LSHIFT;
     return obj;
 }
 
@@ -461,5 +466,64 @@ PrimitiveObject* mod_float(PrimitiveObject* self, PrimitiveObject* other) {
             return NULL;
     }
  
+    return NULL;
+}
+
+// TODO change PrimtiveTypeNames[other->type] to PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]
+
+/* //////////////////////  OPERATOR: bitwise  ////////////////////// */
+
+PrimitiveObject* bitwise_XOR(PrimitiveObject* self, PrimitiveObject* other) {
+    int_Object * a = (int_Object *) self;
+    if (other->type == TYPE_int || other->type == TYPE_bool) {
+        int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
+        return (PrimitiveObject *) new_int(a->value ^ b->value);
+    }
+    printf("Integer bitwise XOR not supported between %s and %s\n", 
+        PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
+    return NULL;
+}
+
+PrimitiveObject* bitwise_AND(PrimitiveObject* self, PrimitiveObject* other) {
+    int_Object * a = (int_Object *) self;
+    if (other->type == TYPE_int || other->type == TYPE_bool) {
+        int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
+        return (PrimitiveObject *) new_int(a->value & b->value);
+    }
+    printf("Integer bitwise XOR not supported between %s and %s\n", 
+        PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
+    return NULL; 
+}
+
+PrimitiveObject* bitwise_OR(PrimitiveObject* self, PrimitiveObject* other) {
+    int_Object * a = (int_Object *) self;
+    if (other->type == TYPE_int || other->type == TYPE_bool) {
+        int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
+        return (PrimitiveObject *) new_int(a->value | b->value);
+    }
+    printf("Integer bitwise XOR not supported between %s and %s\n", 
+        PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
+    return NULL;
+}
+
+PrimitiveObject* bitwise_RSHIFT(PrimitiveObject* self, PrimitiveObject* other) {
+    int_Object * a = (int_Object *) self;
+    if (other->type == TYPE_int || other->type == TYPE_bool) {
+        int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
+        return (PrimitiveObject *) new_int(a->value >> b->value);
+    }
+    printf("Integer bitwise XOR not supported between %s and %s\n", 
+        PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
+    return NULL;
+}
+
+PrimitiveObject* bitwise_LSHIFT(PrimitiveObject* self, PrimitiveObject* other) {
+    int_Object * a = (int_Object *) self;
+    if (other->type == TYPE_int || other->type == TYPE_bool) {
+        int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
+        return (PrimitiveObject *) new_int(a->value << b->value);
+    }
+    printf("Integer bitwise XOR not supported between %s and %s\n", 
+        PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
     return NULL;
 }

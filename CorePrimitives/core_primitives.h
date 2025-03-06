@@ -40,6 +40,11 @@ struct PrimitiveObject {
 typedef struct int_Object {
     PrimitiveObject base;
     int64_t value;
+    BinaryOp bwXOR;
+    BinaryOp bwAND;
+    BinaryOp bwOR;
+    BinaryOp bwRSHIFT;
+    BinaryOp bwLSHIFT;
 } int_Object;
 
 /* Float object */
@@ -93,7 +98,13 @@ PrimitiveObject* div_float(PrimitiveObject* self, PrimitiveObject* other);
 PrimitiveObject* mod_int(PrimitiveObject* self, PrimitiveObject* other);
 PrimitiveObject* mod_float(PrimitiveObject* self, PrimitiveObject* other);
 
-/* TODO add in btiwise operators */
+/* Bitwise operators (only for accesible for int) */
+PrimitiveObject* bitwise_XOR(PrimitiveObject* self, PrimitiveObject* other);
+PrimitiveObject* bitwise_AND(PrimitiveObject* self, PrimitiveObject* other);
+PrimitiveObject* bitwise_OR(PrimitiveObject* self, PrimitiveObject* other);
+PrimitiveObject* bitwise_RSHIFT(PrimitiveObject* self, PrimitiveObject* other);
+PrimitiveObject* bitwise_LSHIFT(PrimitiveObject* self, PrimitiveObject* other);
+
 
 
 #endif
