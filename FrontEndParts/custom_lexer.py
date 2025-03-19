@@ -17,7 +17,7 @@ class Lexer:
         self.keywords = {"if", "else", "while", "return", "fn", "var", "loop", "from", "import"}
         self.token_specification = [
             ('MANY_LINE_COMMENT', r'///(.*)///'),   # Greedy match for multi-line comments
-            ('ONE_LINE_COMMENT',  r'//[^\n]*'),      # Updated: match until newline only
+            ('ONE_LINE_COMMENT',  r'//[^\n]*'),      # Match until newline only
             ('FLOAT',             r'\d+\.\d+'),
             ('INTEGER',           r'\d+'),
             ('STRING',            r'"(.*?)"'),
@@ -33,7 +33,7 @@ class Lexer:
         ]
 
     def tokenize(self):
-        tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in self.token_specification)
+        tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in self.token_specification)    # Create an overarching regex pattern
         print(tok_regex)
         tokens = []
         for obj in re.finditer(tok_regex, self.code, re.DOTALL):

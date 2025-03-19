@@ -2,7 +2,7 @@ import argparse
 from custom_lexer import Lexer
 from custom_parser import Parser
 
-#To run this file: python FrontEndParts/frontend_manager.py -i sample_source_codes/sourceCode.rtsk -o byteCode.bytecode
+#To run this file from proj dir: python FrontEndParts/frontend_manager.py -i sample_source_codes/sourceCode.rtsk -o byteCode.bytecode
 
 # ================================================ Main ================================================
 def main():
@@ -17,14 +17,14 @@ def main():
 
     # Lexical Analysis
     lexer = Lexer(code)
-    tokens = lexer.tokenize()
+    tokens = lexer.tokenize()   # produces a list of Token objects
     print("Tokens:")
     for token in tokens:
         print(token)
 
     # Syntax Analysis
-    parser_obj = Parser(tokens)
-    ast = parser_obj.parse()
+    parser_obj = Parser(tokens) 
+    ast = parser_obj.parse()    # produces an Abstract Syntax Tree (AST) from the list of Token objects
     print("\nAST:")
     print(ast)
 
