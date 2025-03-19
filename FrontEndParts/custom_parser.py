@@ -1,17 +1,33 @@
 from custom_ast_nodes import *
 
+"""
+Missing/Incomplete parts:
+    1. Functions
+    2. Negative numbers
+    3. List objects
+    4. If-else statements does not include else-if
+    5. Checking if-else, loop and while statement parsers are correct
+
+Logic:
+    - Checks the first token of the statement to determine the type of statement
+    - Calls the corresponding parsing function based on the type of statement
+    - Parsing functions are responsible for parsing the statement and returning the corresponding AST node
+    - Returns a specific class for that statement and adds it to the list of statements in the Program node
+    - Use of the different classes help to enclose the different layers of the statements in the AST
+"""
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
         self.pos = 0    # Current position in the token list
 
-    def current_token(self):
+    def current_token(self):    # Get the current token based on the position(self.pos)
         if self.pos < len(self.tokens):
             return self.tokens[self.pos]
         return None
 
-    def consume(self, expected_type=None, expected_value=None):
-        token = self.current_token()
+    def consume(self, expected_type=None, expected_value=None):   # Checks for expected type of the token and consume it and move to the next one (via incrementing self.pos)
+        token = self.current_token()    
         if token is None:
             raise Exception("Unexpected end of input")
         if expected_type and token.type != expected_type:
@@ -21,22 +37,22 @@ class Parser:
         self.pos += 1
         return token
 
-    def match(self, expected_type, expected_value=None):
+    def match(self, expected_type, expected_value=None):    # Checks that current token matches the expected type and/or value, and consume it if it does
         token = self.current_token()
         if token and token.type == expected_type and (expected_value is None or token.value == expected_value):
             self.consume(expected_type, expected_value)
             return True
         return False
 
-    def parse(self):
-        statements = []
+    def parse(self):            # Parse the entire program via running through each token and parsing it into an AST node. 
+        statements = []         # Returns a ast represented as a Program object containing multiple layers of the statements
         while self.current_token() is not None:
             stmt = self.parse_statement()
             if stmt:
                 statements.append(stmt)
         return Program(statements)
 
-    def parse_statement(self):
+    def parse_statement(self):                  # Parse a single statement based on the current token using different parsing logic for different types of statements
         token = self.current_token()
         # Check for keyword-based statements
         if token.type == "KEYWORD":
@@ -64,7 +80,7 @@ class Parser:
         # Fallback: treat it as an expression statement.
         return self.parse_expression_stmt()
 
-    def parse_block(self):
+    def parse_block(self):          # Parse a block of statements enclosed in curly braces {}, for functions or loops or if-else statements
         self.consume("DELIMITER", "{")
         statements = []
         while self.current_token() and not (self.current_token().type == "DELIMITER" and self.current_token().value == "}"):
@@ -74,7 +90,7 @@ class Parser:
         self.consume("DELIMITER", "}")
         return Block(statements)
 
-    def parse_var_decl(self):
+    def parse_var_decl(self):       # Parse a variable declaration statement, matches grammar for variable declaration
         self.consume("KEYWORD", "var")
         id_token = self.consume("IDEN")
         identifier = Identifier(id_token.value)
@@ -83,7 +99,7 @@ class Parser:
         self.consume("DELIMITER", ";")
         return VarDecl(identifier, expr)
 
-    def parse_loop_stmt(self):
+    def parse_loop_stmt(self):      # Parse a loop statement
         self.consume("KEYWORD", "loop")
         id_token = self.consume("IDEN")
         identifier = Identifier(id_token.value)
@@ -99,7 +115,7 @@ class Parser:
             self.consume("DELIMITER", ";")
         return LoopStmt(identifier, start_expr, end_expr, body)
 
-    def parse_if_stmt(self):
+    def parse_if_stmt(self):        # Parse an if-else statement
         self.consume("KEYWORD", "if")
         self.consume("DELIMITER", "(")
         condition = self.parse_expression()
@@ -114,7 +130,7 @@ class Parser:
                 else_branch = self.parse_block()
         return IfStmt(condition, then_branch, else_branch)
 
-    def parse_while_stmt(self):
+    def parse_while_stmt(self):     # Parse a while statement
         self.consume("KEYWORD", "while")
         self.consume("DELIMITER", "(")
         condition = self.parse_expression()
@@ -122,7 +138,7 @@ class Parser:
         body = self.parse_block()
         return WhileStmt(condition, body)
 
-    def parse_expression_stmt(self):
+    def parse_expression_stmt(self):    # Parse an expression statement, makes use of precedence climbing to parse expressions
         expr = self.parse_expression()
         self.consume("DELIMITER", ";")
         return ExpressionStmt(expr)
@@ -179,7 +195,7 @@ class Parser:
             node = BinaryOp(node, op, right)
         return node
 
-    def parse_factor(self):
+    def parse_factor(self):         # Parse a factor, which can be a literal, identifier, function call, or a parenthesized expression (Most basic unit of an expression)
         token = self.current_token()
         if token.type in ("INTEGER", "FLOAT", "STRING"):
             self.consume(token.type)
@@ -190,9 +206,8 @@ class Parser:
             else:
                 value = token.value
             return Literal(value)
-        elif token.type == "IDEN":
+        elif token.type == "IDEN":      # Check for a function call
             self.consume("IDEN")
-            # Check for a function call
             if self.current_token() and self.current_token().type == "DELIMITER" and self.current_token().value == "(":
                 self.consume("DELIMITER", "(")
                 args = []
@@ -204,24 +219,24 @@ class Parser:
                 self.consume("DELIMITER", ")")
                 return CallExpr(Identifier(token.value), args)
             return Identifier(token.value)
-        elif token.type == "DELIMITER" and token.value == "(":
+        elif token.type == "DELIMITER" and token.value == "(":    # Check for a parenthesized expression e.g var x = (a + b) * c;
             self.consume("DELIMITER", "(")
             node = self.parse_expression()
             self.consume("DELIMITER", ")")
             return node
-        elif token.type == "LOGICAL" and token.value in ("!", "-"):
+        elif token.type == "LOGICAL" and token.value in ("!", "-"):   # Check for unary operators e.g !a, -b (can't handle negative yet)
             op = self.consume("LOGICAL").value
             operand = self.parse_factor()
             return UnaryOp(op, operand)
         else:
             raise Exception(f"Unexpected token {token}")
         
-    def peek(self):
+    def peek(self):     # Peek at the next token in the list, useful for identifiers to check that the next token is ASSIGN operator
         if self.pos + 1 < len(self.tokens):
             return self.tokens[self.pos + 1]
         return None
     
-    def parse_assignment_stmt(self):
+    def parse_assignment_stmt(self):        # Parse an assignment statement
         # Consume the identifier on the left-hand side
         left_token = self.consume("IDEN")
         left = Identifier(left_token.value)
