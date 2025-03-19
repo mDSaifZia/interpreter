@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.py": "python",
-        "string.h": "c"
+        "string.h": "c",
+        "type_traits": "c"
     }
 }

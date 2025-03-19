@@ -27,39 +27,39 @@ typedef enum {
     OP_RETURN,     // Return from function                      Binary: 0b 0000 0111
     OP_HALT,       // Stop execution                            Binary: 0b 0000 1000
     OP_JMP,        // JMP to an offset from current idx         Binary: 0b 0000 1001
-    OP_JMPIF,
+    OP_JMPIF,      // false ? JMP to and offset from curr idx   Binary: 0b 0000 1010
 
     // OPCODE primitives (SYNTAX: TYPE (ARG))
-    INT,           // prim obj int representation               Binary: 0b 0000 1010
-    FLOAT,         // prim obj float representation             Binary: 0b 0000 1011
-    BOOL,          // prim obj bool representation              Binary: 0b 0000 1100
-    STR,           // prim obj str representation               Binary: 0b 0000 1101
-    _NULL_,        // prim _NULL_ representation                Binary: 0b 0000 1110
-    ID,            // ID representation                         Binary: 0b 0000 1111
+    INT,           // prim obj int representation               Binary: 0b 0000 1011
+    FLOAT,         // prim obj float representation             Binary: 0b 0000 1100
+    BOOL,          // prim obj bool representation              Binary: 0b 0000 1101
+    STR,           // prim obj str representation               Binary: 0b 0000 1110
+    _NULL_,        // prim _NULL_ representation                Binary: 0b 0000 1111
+    ID,            // ID representation                         Binary: 0b 0001 0000
 
     // OPCODE flags (SYNTAX: FLAG (NO ARG))
-    OP_FUNCDEF,    // Flag for start of function definition     Binary: 0b 0001 0000
-    OP_ENDFUNC,    // Flag for end of function definition       Binary: 0b 0001 0001
-    OP_CLASSDEF,   // Flag for start of class definition        Binary: 0b 0001 0010
-    OP_ENDCLASS   // Flag for end of class definition           Binary: 0b 0001 0011
+    OP_FUNCDEF,    // Flag for start of function definition     Binary: 0b 0001 0001
+    OP_ENDFUNC,    // Flag for end of function definition       Binary: 0b 0001 0010
+    OP_CLASSDEF,   // Flag for start of class definition        Binary: 0b 0001 0011
+    OP_ENDCLASS,  // Flag for end of class definition           Binary: 0b 0001 0100
+
+    // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
+    OP_BLSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0101
+    OP_BRSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0110
+    OP_BXOR,     // Flag for end of class definition            Binary: 0b 0001 0111
+    OP_BOR,      // Flag for end of class definition            Binary: 0b 0001 1000
+    OP_BAND,     // Flag for end of class definition            Binary: 0b 0001 1001
 
 } OpCode;
 
-// /* /////////////////////////////// HASHMAP /////////////////////////////// */
+/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
 
-// typedef struct HashmapEntry{
-//     char * key;
-//     void * value;  // Can hold PrimitiveObject* OR Object*
-//     struct HashmapEntry * next;
-// } HashmapEntry;
+typedef struct GlobalEntry{
+    void * value;
+    StackEntryType entry_type;
+} GlobalEntry;
 
-// typedef struct {
-//     HashmapEntry ** table;
-//     size_t capacity;
-//     size_t length;
-// } Hashmap;
-
-// /* /////////////////////////////// HASHMAP /////////////////////////////// */
+/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
 
 /* /////////////////////////////// STACK TABLE /////////////////////////////// */
 
@@ -67,6 +67,7 @@ typedef enum {
     PRIMITIVE_OBJ,
     ADVANCED_OBJ,
     FUNCTION_FRAME,
+    IDENTIFIER
 } StackEntryType;
 
 typedef struct StackEntry{
@@ -113,6 +114,8 @@ typedef struct {
 
     Hashmap * globals;  // Global variable storage
 
+    // implement an instance table for garbage collection
+
     PrimitiveObject * constants[MAX_CONSTANTS]; // Constant table (stores integer and float constants for quick lookup) We technically do not need to free this as it should never grow beyond the table size
     int constantCount;
 
@@ -121,21 +124,12 @@ typedef struct {
 
 /* Function Declarations */
 VM * initVM(); // VM "object" like struct
-void run(VM* vm);
+void run(VM* vm, const char* bytecode_file);
 void freeVM(VM* vm);
 
 /* stack functions */
 void push(VM* vm, void* value, StackEntryType type); 
 StackEntry pop(VM* vm);
-
-// /* hashtable functions */
-// Hashmap * init_hashmap(size_t capcacity);
-// size_t hash(const char *str, size_t capcacity);
-// void hashmap_resize(Hashmap * hashmap); // does not take addtional arguments as we will assume doubling 
-// void hashmap_set(Hashmap * hashmap, const char * key, void * value);
-// void * hashmap_get(Hashmap * hashmap, const char * key);
-// void hashmap_delete(Hashmap * hashmap, const char * key, void (*free_value)(void*));
-// void free_hashmap(Hashmap * hashmap, void (*free_value)(void*)); 
 
 
 #endif
