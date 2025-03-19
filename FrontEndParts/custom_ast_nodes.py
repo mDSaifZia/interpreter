@@ -1,0 +1,92 @@
+class ASTNode:
+    pass
+
+class Program(ASTNode):
+    def __init__(self, statements):
+        self.statements = statements
+    def __repr__(self):
+        return f"Program({self.statements})"
+
+class VarDecl(ASTNode):
+    def __init__(self, identifier, expr):
+        self.identifier = identifier
+        self.expr = expr
+    def __repr__(self):
+        return f"VarDecl({self.identifier}, {self.expr})"
+
+class LoopStmt(ASTNode):
+    def __init__(self, var, start_expr, end_expr, body):
+        self.var = var
+        self.start_expr = start_expr
+        self.end_expr = end_expr
+        self.body = body
+    def __repr__(self):
+        return f"LoopStmt({self.var}, {self.start_expr}, {self.end_expr}, {self.body})"
+
+class IfStmt(ASTNode):
+    def __init__(self, condition, then_branch, else_branch=None):
+        self.condition = condition
+        self.then_branch = then_branch
+        self.else_branch = else_branch
+    def __repr__(self):
+        return f"IfStmt({self.condition}, {self.then_branch}, {self.else_branch})"
+
+class WhileStmt(ASTNode):
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+    def __repr__(self):
+        return f"WhileStmt({self.condition}, {self.body})"
+
+class ExpressionStmt(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"ExpressionStmt({self.expr})"
+
+class Block(ASTNode):
+    def __init__(self, statements):
+        self.statements = statements
+    def __repr__(self):
+        return f"Block({self.statements})"
+
+class BinaryOp(ASTNode):
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+    def __repr__(self):
+        return f"BinaryOp({self.left}, {self.op}, {self.right})"
+
+class UnaryOp(ASTNode):
+    def __init__(self, op, operand):
+        self.op = op
+        self.operand = operand
+    def __repr__(self):
+        return f"UnaryOp({self.op}, {self.operand})"
+
+class Literal(ASTNode):
+    def __init__(self, value):
+        self.value = value
+    def __repr__(self):
+        return f"Literal({self.value})"
+
+class Identifier(ASTNode):
+    def __init__(self, name):
+        self.name = name
+    def __repr__(self):
+        return f"Identifier({self.name})"
+
+class CallExpr(ASTNode):
+    def __init__(self, callee, arguments):
+        self.callee = callee
+        self.arguments = arguments
+    def __repr__(self):
+        return f"CallExpr({self.callee}, {self.arguments})"
+
+class Assignment(ASTNode):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def __repr__(self):
+        return f"Assignment({self.left}, {self.right})"
