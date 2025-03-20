@@ -9,3 +9,4 @@ var z = x + y;
 var b = a;
 b = z;
 n = !a; 
+var r = 9 + -1 * (-7);

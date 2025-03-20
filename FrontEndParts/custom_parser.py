@@ -224,10 +224,14 @@ class Parser:
             node = self.parse_expression()
             self.consume("DELIMITER", ")")
             return node
-        elif token.type == "LOGICAL" and token.value in ("!", "-"):   # Check for unary operators e.g !a, -b (can't handle negative yet)
-            op = self.consume("LOGICAL").value
+        elif token.type == "LOGICAL" and token.value == "!":    # Check for unary operators e.g !a, -b 
+            op = self.consume("LOGICAL", "!")
             operand = self.parse_factor()
-            return UnaryOp(op, operand)
+            return UnaryOp(op.value, operand)
+        elif token.type == "ARITHMETIC" and token.value == "-": # Check for unary operators e.g -b (for handling negative numbers)
+            op = self.consume("ARITHMETIC", "-")
+            operand = self.parse_factor()
+            return UnaryOp(op.value, operand)
         else:
             raise Exception(f"Unexpected token {token}")
         
