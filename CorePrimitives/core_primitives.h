@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 /* Define core primitive types */
 typedef enum {
@@ -26,7 +27,7 @@ typedef PrimitiveObject* (*BinaryOp)(PrimitiveObject*, PrimitiveObject*);
 /* Base primitive object */
 struct PrimitiveObject {
     PrimitiveType type;
-    // void (*free)(PrimitiveObject* self); // all primitives except for null must be freed 
+    // void (*free)(PrimitiveObject* self); // all primitives except for null must be freed
     BinaryOp add;
     BinaryOp mul;
     BinaryOp div;
@@ -75,7 +76,7 @@ int_Object* new_int(int64_t value);
 float_Object* new_float(double value);
 bool_Object* new_bool(int bool_value);
 str_Object* new_str(const char* string_value);
-Null_Object* get_null(); // Singleton instance 
+Null_Object* get_null(); // Singleton instance
 
 /* Free functions */
 void free_primitive(PrimitiveObject* object);

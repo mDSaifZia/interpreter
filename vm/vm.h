@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "CorePrimitives/core_primitives.h"
-#include "AdvancedPrimitives/advanced_primitives.h"
-#include "hashmap/hashmap.h"
+#include "../CorePrimitives/core_primitives.h"
+#include "../AdvancedPrimitives/advanced_primitives.h"
+#include "../hashmap/hashmap.h"
 
-#define STACK_MAX 1024              
+#define STACK_MAX 1024
 #define MAX_CONSTANTS 1024
 #define MAX_GLOBALS 1024
 #define MAX_FUNCTIONS 256
@@ -21,7 +21,7 @@ typedef enum {
     OP_SUB,        // Sub two values (consistency of sub op)    Binary: 0b 0000 0001
     OP_MUL,        // Multiply                                  Binary: 0b 0000 0010
     OP_DIV,        // Divide                                    Binary: 0b 0000 0011
-    OP_GET_GLOBAL, // Get a global variable                     Binary: 0b 0000 0100              
+    OP_GET_GLOBAL, // Get a global variable                     Binary: 0b 0000 0100
     OP_SET_GLOBAL, // Set a global variable                     Binary: 0b 0000 0101
     OP_CALL,       // Call function                             Binary: 0b 0000 0110
     OP_RETURN,     // Return from function                      Binary: 0b 0000 0111
@@ -50,16 +50,14 @@ typedef enum {
     OP_BOR,      // Flag for end of class definition            Binary: 0b 0001 1000
     OP_BAND,     // Flag for end of class definition            Binary: 0b 0001 1001
 
+    // OPCODE local variables (SYNTAX: OP (NO ARG))
+    OP_GET_LOCAL,  // Get local variable                        Binary: 0b 0001 1010
+    OP_SET_LOCAL,  // Set local variable                        Binary: 0b 0001 1011
+    OP_DEFINE_LOCAL, // Define new local variable               Binary: 0b 0001 1100
+    OP_ENTER_SCOPE, // Enter a new scope                        Binary: 0b 0001 1101
+
 } OpCode;
 
-/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
-
-typedef struct GlobalEntry{
-    void * value;
-    StackEntryType entry_type;
-} GlobalEntry;
-
-/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
 
 /* /////////////////////////////// STACK TABLE /////////////////////////////// */
 
@@ -83,6 +81,15 @@ typedef struct Stack{
 
 /* /////////////////////////////// STACK TABLE /////////////////////////////// */
 
+/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
+
+typedef struct GlobalEntry{
+  void * value;
+  StackEntryType entry_type;
+} GlobalEntry;
+
+/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
+
 /* /////////////////////////////// FUNCTION TABLE /////////////////////////////// */
 
 typedef struct {
@@ -105,10 +112,10 @@ typedef struct {
 /* VM Structure */
 typedef struct {
     Stack stack;  // stack to store entries
-    
+
     FunctionEntry functions[MAX_FUNCTIONS]; // Function table (subject to change as we just implemented hashmaps)
     int functionCount;
-    
+
     ObjectEntry objects[MAX_OBJECTS]; // Object table (subject to change as we just implemented hashmaps)
     int objectCount;
 
@@ -128,7 +135,7 @@ void run(VM* vm, const char* bytecode_file);
 void freeVM(VM* vm);
 
 /* stack functions */
-void push(VM* vm, void* value, StackEntryType type); 
+void push(VM* vm, void* value, StackEntryType type);
 StackEntry pop(VM* vm);
 
 
