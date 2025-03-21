@@ -255,3 +255,24 @@ class Parser:
         # Consume the semicolon at the end of the statement
         self.consume("DELIMITER", ";")
         return Assignment(left, right)
+    
+    def parse_function_decl(self):
+        self.consume("KEYWORD", "fn")
+        name_token = self.consume("IDEN")
+        name = Identifier(name_token.value)
+        self.consume("DELIMITER", "(")
+        params = []
+        if not (self.current_token().type == "DELIMITER" and self.current_token().value == ")"):
+            params.append(Identifier(self.consume("IDEN").value))
+            while self.current_token() and self.current_token().type == "DELIMITER" and self.current_token().value == ",":
+                self.consume("DELIMITER", ",")
+                params.append(Identifier(self.consume("IDEN").value))
+        self.consume("DELIMITER", ")")
+        body = self.parse_block()
+        return FunctionDecl(name, params, body)
+    
+    def parse_return_stmt(self):
+        self.consume("KEYWORD", "return")
+        expr = self.parse_expression()
+        self.consume("DELIMITER", ";")
+        return ReturnStmt(expr)

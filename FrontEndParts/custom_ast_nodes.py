@@ -90,3 +90,17 @@ class Assignment(ASTNode):  # Assignment operation e.g. a = 5
         self.right = right
     def __repr__(self):
         return f"Assignment({self.left}, {self.right})"
+    
+class FunctionDecl(ASTNode):
+    def __init__(self, name, params, body):
+        self.name = name
+        self.params = params
+        self.body = body
+    def __repr__(self):
+        return f"FunctionDecl({self.name}, {self.params}, {self.body})"
+    
+class ReturnStmt(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"ReturnStmt({self.expr})"
