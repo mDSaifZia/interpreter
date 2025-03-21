@@ -3,10 +3,10 @@ from custom_ast_nodes import *
 """
 Missing/Incomplete parts:
     1. Functions
-    2. Negative numbers
+    2. Negative numbers (Done)
     3. List objects
-    4. If-else statements does not include else-if
-    5. Checking if-else, loop and while statement parsers are correct
+    4. If-else statements does not include else-if (Done)
+    5. Checking if-else, loop and while statement parsers are correct (Done)
 
 Logic:
     - Checks the first token of the statement to determine the type of statement
@@ -205,6 +205,10 @@ class Parser:
                 value = float(token.value)
             else:
                 value = token.value
+            return Literal(value)
+        elif token.type == "BOOLEAN":
+            self.consume("BOOLEAN")
+            value = True if token.value == "true" else False
             return Literal(value)
         elif token.type == "IDEN":      # Check for a function call
             self.consume("IDEN")

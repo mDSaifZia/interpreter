@@ -21,6 +21,7 @@ class Lexer:
             ('FLOAT',             r'\d+\.\d+'),
             ('INTEGER',           r'\d+'),
             ('STRING',            r'"(.*?)"'),
+            ('BOOLEAN',           r'\b(?:true|false)\b'),
             ('RELATIONAL',        r'==|!=|>=|<=|[><]'), # must check multi-char first. If not will match "==" as 2 consecutive "=" instead
             ('LOGICAL',           r'&&|\|\||[!^]'),
             ('ARITHMETIC',        r'[+\-*/]'),

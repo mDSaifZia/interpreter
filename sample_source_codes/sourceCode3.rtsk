@@ -1,0 +1,23 @@
+/// This is a multi-line comment
+/// spanning multiple lines.
+/// End of multi-line comment ///
+
+var x = 10;
+var y = 20;
+
+loop i from(1, 5) {
+    // Double the value of i
+    var doubled = i * 2;
+    }
+
+if (x > 25) {
+    var status = "high";
+} else if (x==25) { 
+    var status = "mid"; 
+} else {
+    var status = "low";
+}
+
+while (x < y) {
+    x = x + 1;
+}
