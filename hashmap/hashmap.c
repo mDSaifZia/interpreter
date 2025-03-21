@@ -24,7 +24,7 @@ size_t hash(const char* str, size_t capacity) {
     return hash % capacity;
 }
 
-void hashmap_resize(Hashmap * hashmap) {
+void hashmap_resize(Hashmap * hashmap, void (*free_value)(void*)) {
     // temporaily save the old capacity and old table
     size_t old_capacity = hashmap->capacity;
     HashmapEntry **old_table = hashmap->table;
@@ -46,8 +46,7 @@ void hashmap_resize(Hashmap * hashmap) {
     for (i=0; i < old_capacity; i++) {
         HashmapEntry * entry = old_table[i]; 
         while (entry) { 
-            hashmap_set(hashmap, entry->key, entry->value);
-            
+            hashmap_set(hashmap, entry->key, entry->value, free_value);
 
             free(entry->key);  // free old key as hashmap_set duplicates it
             free(entry);
@@ -59,12 +58,17 @@ void hashmap_resize(Hashmap * hashmap) {
 }
 
 // unint32_t is as used since we can resonably expect that there will not be more than 2^32 variables declared by any single running program.
-void hashmap_set(Hashmap * hashmap, const char * key, void * value) {
+
+/*
+Sets a char * "key" to a specified void * "value". DOES NOT free the key.
+key needs to be explictly freed after calling hashmap_set
+*/
+void hashmap_set(Hashmap * hashmap, const char * key, void * value, void (*free_value)(void*)) {
     // Check if the hashmap occupancy exceeds the tolerance 
     float tolerance = 0.85;
     float occupancy = (float) hashmap->length/ (float) hashmap->capacity;
     if (occupancy > tolerance) {
-        hashmap_resize(hashmap);
+        hashmap_resize(hashmap, free_value);
     }
 
     size_t index = hash(key, hashmap->capacity);
@@ -73,6 +77,9 @@ void hashmap_set(Hashmap * hashmap, const char * key, void * value) {
     // check if a key exists:
     while (entry) {
         if (strcmp(entry->key, key) == 0) {
+            if (free_value) {
+                free_value(entry->value);  // free if needed.
+            }
             entry->value = value;
             return;
         }
@@ -88,6 +95,10 @@ void hashmap_set(Hashmap * hashmap, const char * key, void * value) {
     hashmap->length++; // increment the count to keep track of length of hashmap (not really used but good to have)
 }
 
+/*
+Gets the value of char * key. DOES NOT free the key. 
+key needs to explicitly freed after calling hashmap_get
+*/
 void * hashmap_get(Hashmap * hashmap, const char * key) {
     size_t index = hash(key, hashmap->capacity);
     HashmapEntry * entry = hashmap->table[index];

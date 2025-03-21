@@ -56,6 +56,10 @@ typedef enum {
     OP_DEFINE_LOCAL, // Define new local variable               Binary: 0b 0001 1100
     OP_ENTER_SCOPE, // Enter a new scope                        Binary: 0b 0001 1101
 
+    // OPCODES standard functions
+    OP_PRINT,       // prints to stdout                         Binary: 0b 0001 1110
+    OP_INPUT,       // gets values from stdin                   Binary: 0b 0001 1111
+
 } OpCode;
 
 
@@ -137,6 +141,18 @@ void freeVM(VM* vm);
 /* stack functions */
 void push(VM* vm, void* value, StackEntryType type);
 StackEntry pop(VM* vm);
+
+/* constant table functions */
+
+/*
+Opcode: Only accepts BOOL, _NULL_ and INT
+value: represents the value to find
+
+get_constant(BOOL, 1) -> returns boolObject * True
+get_constant(BOOL, 0) -> returns boolObject * False
+get_constant(__NULL__, 1) -> returns NULLobject *
+*/
+PrimitiveObject * get_constant(VM *vm, OpCode opcode, int64_t value);
 
 
 #endif
