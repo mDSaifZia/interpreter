@@ -36,6 +36,7 @@ typedef enum {
     STR,           // prim obj str representation               Binary: 0b 0000 1110
     _NULL_,        // prim _NULL_ representation                Binary: 0b 0000 1111
     ID,            // ID representation                         Binary: 0b 0001 0000
+    ID_FUNC,
 
     // OPCODE flags (SYNTAX: FLAG (NO ARG))
     OP_FUNCDEF,    // Flag for start of function definition     Binary: 0b 0001 0001
@@ -59,6 +60,13 @@ typedef enum {
     // OPCODES standard functions
     OP_PRINT,       // prints to stdout                         Binary: 0b 0001 1110
     OP_INPUT,       // gets values from stdin                   Binary: 0b 0001 1111
+
+    OP_MOD, // (TODO: Implement this in core primitives mengtek u dumb fuck)
+    OP_EQ, 
+    OP_GEQ,
+    OP_QE,
+    OP_LEQ,
+    OP_LE
 
 } OpCode;
 
@@ -86,7 +94,7 @@ typedef struct Stack{
 /* /////////////////////////////// STACK TABLE /////////////////////////////// */
 
 /* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
-
+/* This is essentially the same StackEntry but made different so we can mutate it if needed */
 typedef struct GlobalEntry{
   void * value;
   StackEntryType entry_type;

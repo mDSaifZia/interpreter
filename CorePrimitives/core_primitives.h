@@ -32,6 +32,11 @@ struct PrimitiveObject {
     BinaryOp mul;
     BinaryOp div;
     BinaryOp mod;
+    BinaryOp eq;
+    BinaryOp geq;
+    BinaryOp ge;
+    BinaryOp leq;
+    BinaryOp le;
 };
 
 /* It is crucial that the primitive object base is the first feild in these derivative structs as it allows us

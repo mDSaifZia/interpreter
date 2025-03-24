@@ -31,6 +31,13 @@ VM * initVM() {
 
     /* Populate the constant table with a few predefined constants: __NULL__, TRUE, FALSE */
     memset(vm->constants, 0, sizeof(vm->constants)); // Zero out constant table (as it is a array of ptrs, this means it is initialise to NULL ptrs)
+    // preload constants
+    vm->constants[vm->constantCount++] = (PrimitiveObject *)get_null();        // index 0
+    vm->constants[vm->constantCount++] = (PrimitiveObject *)new_bool(0);       // index 1 (false)
+    vm->constants[vm->constantCount++] = (PrimitiveObject *)new_bool(1);       // index 2 (true)
+    for (int i = -510; i <= 510; i++) {
+        vm->constants[vm->constantCount++] = (PrimitiveObject *)new_int(i);
+    }
 
     //initialise bytecode instruction pointer
     vm->bytecode_ip = NULL;
@@ -71,6 +78,13 @@ VM * initVM() {
 // OP_BXOR,     // Flag for end of class definition            Binary: 0b 0001 0111
 // OP_BOR,      // Flag for end of class definition            Binary: 0b 0001 1000
 // OP_BAND,     // Flag for end of class definition            Binary: 0b 0001 1001
+
+// OP_mod, // (TODO: Implement this in core primitives mengtek u dumb fuck)
+// OP_EQ, 
+// OP_GEQ,
+// OP_QE,
+// OP_LEQ,
+// OP_LE
 
 /*
 INT, FLOAT -> read 8 bytes after opcode
@@ -190,7 +204,7 @@ void run(VM* vm, const char* bytecode_file) {
             }
             
             case BOOL: { // [1 byte opcode][1 byte int8]
-                uint8_t bool_value; // we can optimised this further with the global table
+                uint8_t bool_value; 
                 PrimitiveObject * bool_to_push;
                 memcpy(&bool_value, vm->bytecode_ip, sizeof(uint8_t)); // Read single byte
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + sizeof(uint8_t)); // Move past 1 byte
@@ -366,7 +380,7 @@ void run(VM* vm, const char* bytecode_file) {
             }
             
 
-            case OP_JMP: {
+            case OP_JMP: { //[1 byte opcode][4 byte signed offset]
                 int32_t offset;
                 memcpy(&offset, vm->bytecode_ip, sizeof(int32_t)); // Read 4 bytes as a signed offset
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + sizeof(int32_t)); // Move past the offset bytes
