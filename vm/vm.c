@@ -25,7 +25,7 @@ VM * initVM() {
     vm->functionCount = 0;
     vm->objectCount = 0;
 
-    // create clean tables 
+    // create clean tables
     memset(vm->functions, 0, sizeof(vm->functions)); // Zero out function table
     memset(vm->objects, 0, sizeof(vm->objects));     // Zero out object table
 
@@ -50,48 +50,48 @@ VM * initVM() {
 // OP_SUB,        // Sub two values (consistency of sub op)    done
 // OP_MUL,        // Multiply                                  done
 // OP_DIV,        // Divide                                    done
-// OP_GET_GLOBAL, // Get a global variable                     done         
+// OP_GET_GLOBAL, // Get a global variable                     done
 // OP_SET_GLOBAL, // Set a global variable                     done
-// OP_CALL,       // Call function                              
-// OP_RETURN,     // Return from function                      
+// OP_CALL,       // Call function
+// OP_RETURN,     // Return from function
 // OP_HALT,       // Stop execution                            done
 // OP_JMP,        // JMP to an offset from current idx         done
-// OP_JMPIF,      // false ? JMP to and offset from curr idx   done 
+// OP_JMPIF,      // false ? JMP to and offset from curr idx   done
 
 // // OPCODE primitives (SYNTAX: TYPE (ARG))
-// INT,           // prim obj int representation               done 
+// INT,           // prim obj int representation               done
 // FLOAT,         // prim obj float representation             done
-// BOOL,          // prim obj bool representation              done 
-// STR,           // prim obj str representation               done 
+// BOOL,          // prim obj bool representation              done
+// STR,           // prim obj str representation               done
 // _NULL_,        // prim _NULL_ representation (NO ARGS)      done
 // ID,            // ID representation                         done
 
 // // OPCODE flags (SYNTAX: FLAG (NO ARG))
-// OP_FUNCDEF,    // Flag for start of function definition     
-// OP_ENDFUNC,    // Flag for end of function definition       
-// OP_CLASSDEF,   // Flag for start of class definition        
-// OP_ENDCLASS,  // Flag for end of class definition           
+// OP_FUNCDEF,    // Flag for start of function definition
+// OP_ENDFUNC,    // Flag for end of function definition
+// OP_CLASSDEF,   // Flag for start of class definition
+// OP_ENDCLASS,  // Flag for end of class definition
 
 // // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
-// OP_BLSHIFT,  // Flag for end of class definition            
-// OP_BRSHIFT,  // Flag for end of class definition            
-// OP_BXOR,     // Flag for end of class definition            
-// OP_BOR,      // Flag for end of class definition            
-// OP_BAND,     // Flag for end of class definition            
+// OP_BLSHIFT,  // Flag for end of class definition
+// OP_BRSHIFT,  // Flag for end of class definition
+// OP_BXOR,     // Flag for end of class definition
+// OP_BOR,      // Flag for end of class definition
+// OP_BAND,     // Flag for end of class definition
 
 // // OPCODE local variables (SYNTAX: OP (NO ARG))
-// OP_GET_LOCAL,  // Get local variable                        
-// OP_SET_LOCAL,  // Set local variable                        
-// OP_DEFINE_LOCAL, // Define new local variable               
-// OP_ENTER_SCOPE, // Enter a new scope                        
+// OP_GET_LOCAL,  // Get local variable
+// OP_SET_LOCAL,  // Set local variable
+// OP_DEFINE_LOCAL, // Define new local variable
+// OP_ENTER_SCOPE, // Enter a new scope
 
 // // OPCODES standard functions
-// OP_PRINT,       // prints to stdout                         
-// OP_INPUT,       // gets values from stdin                   
+// OP_PRINT,       // prints to stdout
+// OP_INPUT,       // gets values from stdin
 
-// OP_MOD, 
+// OP_MOD,
 // OP_NEQ
-// OP_EQ, 
+// OP_EQ,
 // OP_GEQ,
 // OP_GT,
 // OP_LEQ,
@@ -195,7 +195,7 @@ void run(VM* vm, const char* bytecode_file) {
                 return;
 
             case INT: { // [1 byte opcode][8 byte int64]
-                int64_t value; 
+                int64_t value;
                 PrimitiveObject * int_to_push;
 
                 memcpy(&value, vm->bytecode_ip, sizeof(int64_t));  // Copy raw bytes into value
@@ -205,7 +205,7 @@ void run(VM* vm, const char* bytecode_file) {
                 push(vm, int_to_push, PRIMITIVE_OBJ);
                 break;
             }
-            
+
             case FLOAT: { // [1 byte opcode][8 byte double]
                 double value;
                 memcpy(&value, vm->bytecode_ip, sizeof(double)); // Copy raw bytes into value
@@ -213,44 +213,44 @@ void run(VM* vm, const char* bytecode_file) {
                 push(vm, new_float(value), PRIMITIVE_OBJ);
                 break;
             }
-            
+
             case BOOL: { // [1 byte opcode][1 byte int8]
-                uint8_t bool_value; 
+                uint8_t bool_value;
                 PrimitiveObject * bool_to_push;
                 memcpy(&bool_value, vm->bytecode_ip, sizeof(uint8_t)); // Read single byte
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + sizeof(uint8_t)); // Move past 1 byte
                 push(vm, get_constant(vm, BOOL, bool_value), PRIMITIVE_OBJ);
                 break;
             }
-            
+
             case STR: { // [1 byte opcode][4 byte length][ length number of bytes]
                 uint32_t length;
                 memcpy(&length, vm->bytecode_ip, sizeof(uint32_t)); // Read 4 bytes as string length
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + sizeof(uint32_t)); // Move past length field
-            
+
                 char* str_value = malloc(length + 1);
                 memcpy(str_value, vm->bytecode_ip, length); // Copy string data
                 str_value[length] = '\0'; // Null-terminate
-            
+
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + length); // Move past string bytes
-            
+
                 push(vm, new_str(str_value), PRIMITIVE_OBJ);
                 free(str_value); // Free our temp variable
                 break;
             }
-            
-            
+
+
             case ID: {   // [1 byte opcode][2 byte ID length][ ID length number of bytes]
                 uint16_t length;
                 memcpy(&length, vm->bytecode_ip, sizeof(uint16_t)); // Read 2 bytes for ID length
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + sizeof(uint16_t)); // Move past length field
-            
+
                 char* identifier = malloc(length + 1); // we malloced here so we must free when we hit OP_GET_GLOBAL and OP_SET_GLOBAL
                 memcpy(identifier, vm->bytecode_ip, length); // Copy ID string
                 identifier[length] = '\0'; // Null-terminate
-            
+
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + length); // Move past ID bytes
-            
+
                 push(vm, identifier, IDENTIFIER);  // Push identifier as raw string
                 break;
             }
@@ -278,14 +278,14 @@ void run(VM* vm, const char* bytecode_file) {
                 if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
 
                     if (((PrimitiveObject *) b.value)->type != TYPE_int || ((PrimitiveObject *) b.value)->type != TYPE_float) { // subtraction only supported between ints and floats by default
-                        printf("Error: Invalid types for SUB operation.\n"); 
+                        printf("Error: Invalid types for SUB operation.\n");
                     } else {
-                        
-                        // ensure that c applies the negative appropriately 
+
+                        // ensure that c applies the negative appropriately
                         if (((PrimitiveObject *) b.value)->type != TYPE_int) ((int_Object *) b.value)->value *= -1;
                         else ((float_Object *) b.value)->value *= -1;
 
-                        PrimitiveObject* result =  ((PrimitiveObject *) a.value)->add(((PrimitiveObject *) a.value), ((PrimitiveObject *) b.value)); //cast back to primitive 
+                        PrimitiveObject* result =  ((PrimitiveObject *) a.value)->add(((PrimitiveObject *) a.value), ((PrimitiveObject *) b.value)); //cast back to primitive
                         push(vm, result, PRIMITIVE_OBJ);
                     }
                 } else {
@@ -293,7 +293,7 @@ void run(VM* vm, const char* bytecode_file) {
                 }
                 break;
             }
-    
+
             case OP_MUL: { // modify this to first check constant table
                 StackEntry b = pop(vm);
                 StackEntry a = pop(vm);
@@ -305,7 +305,7 @@ void run(VM* vm, const char* bytecode_file) {
                 }
                 break;
             }
-                
+
 
             case OP_DIV: { //modify this to first check the constant table
                 StackEntry b = pop(vm);
@@ -319,11 +319,11 @@ void run(VM* vm, const char* bytecode_file) {
                 break;
             }
 
-            
+
                         /*
             EXAMPLE:
             y = 4
-            x = y 
+            x = y
             should translate to:
             INT 4 -> (pushed onto stack) -> stack_bottom [4] stack_top
             ID y -> (pushed onto stack) -> stack_bottom [4, y] stack_top
@@ -335,30 +335,30 @@ void run(VM* vm, const char* bytecode_file) {
             */
             case OP_GET_GLOBAL: {
                 StackEntry id = pop(vm);
-            
+
                 if (id.entry_type != IDENTIFIER) {
                     printf("Error: Expected IDENTIFIER for global name.\n");
                     break;
                 }
-            
+
                 char* var_name = (char*)id.value;
                 GlobalEntry* entry = (GlobalEntry*)hashmap_get(vm->globals, var_name);
-            
+
                 if (!entry) {
                     printf("Error: Undefined global variable \"%s\".\n", var_name);
                     free(var_name);
                     break;
                 }
-                
+
                 push(vm, entry->value, entry->entry_type);
-            
+
                 free(var_name); // malloced during ID opcode
                 break;
             }
-            
+
             /*
             EXAMPLE:
-            x = 4 
+            x = 4
             should translate to:
             INT 4 -> (pushed onto stack) -> stack_bottom [4] stack_top
             ID x -> (pushed onto stack) -> stack_bottom [4, x] stack_top
@@ -367,35 +367,35 @@ void run(VM* vm, const char* bytecode_file) {
             case OP_SET_GLOBAL: {
                 StackEntry id = pop(vm);
                 StackEntry value = pop(vm);
-            
+
                 if (id.entry_type != IDENTIFIER) {
                     printf("Error: Expected IDENTIFIER for global name.\n");
                     break;
                 }
-            
+
                 char* var_name = (char*)id.value;
-            
+
                 GlobalEntry* entry = malloc(sizeof(GlobalEntry));
                 entry->value = value.value;
                 entry->entry_type = value.entry_type;
-                
+
                 /*
                 Keep in mind we still have a potential memory leak here as we do not garbage collect the values of the globalEntry
                 (We are intentionally not freeing the values here as there may be multiple references to them in stackframes and vars so this a job for the GC)
                 (However we can safely free GlobalEntry as it is simply a wrapper)
                 */
                 hashmap_set(vm->globals, var_name, entry, free); // free is added here as we have to free the previous globalEntry when we reassign a variable
-            
+
                 free(var_name); // was malloc'ed during ID opcode
                 break;
             }
-            
+
 
             case OP_JMP: { //[1 byte opcode][4 byte signed offset]
                 int32_t offset;
                 memcpy(&offset, vm->bytecode_ip, sizeof(int32_t)); // Read 4 bytes as a signed offset
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + sizeof(int32_t)); // Move past the offset bytes
-            
+
                 // Apply jump
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + offset);
                 break;
@@ -405,19 +405,19 @@ void run(VM* vm, const char* bytecode_file) {
                 int32_t offset;
                 memcpy(&offset, vm->bytecode_ip, sizeof(int32_t)); // Read 4-byte offset
                 vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + sizeof(int32_t)); // Move past offset
-            
+
                 StackEntry condition = pop(vm);
                 if (condition.entry_type != PRIMITIVE_OBJ) {
                     printf("Error: Expected PRIMITIVE_OBJ for conditional jump.\n");
                     break;
                 }
-            
+
                 if (!is_truthy((PrimitiveObject*)condition.value)) {
                     vm->bytecode_ip = (uint64_t*)((uint8_t*)vm->bytecode_ip + offset); // Apply jump
                 }
                 break;
             }
-            
+
             default:
                 printf("Unknown instruction: 0x%02X\n", instruction);
                 break;
@@ -433,7 +433,7 @@ void run(VM* vm, const char* bytecode_file) {
 /* ///////////////////////// STACK ///////////////////////// */
 
 /* pushes a StackEntry onto stack */
-void push(VM* vm, void* value, StackEntryType type) { 
+void push(VM* vm, void* value, StackEntryType type) {
     Stack *stack = &vm->stack; // Use a pointer to modify the actual stack in VM
     StackEntry entry;
     entry.value = value;
@@ -442,7 +442,7 @@ void push(VM* vm, void* value, StackEntryType type) {
     if (stack->stack_top < STACK_MAX) { // Check stack limit
         stack->stack[stack->stack_top] = entry;
         stack->stack_top++;
-    } else { 
+    } else {
         printf("Stack overflow error.\n");
         return;
     }
@@ -458,7 +458,7 @@ StackEntry pop(VM* vm) {
         StackEntry errorEntry = {NULL, PRIMITIVE_OBJ}; // Return an invalid entry
         return errorEntry;
     }
-    
+
     stack->stack_top--; // Move stack top down
     return stack->stack[stack->stack_top]; // Return the popped entry
 }

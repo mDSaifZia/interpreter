@@ -8,41 +8,40 @@
 #include "../AdvancedPrimitives/advanced_primitives.h"
 #include "../hashmap/hashmap.h"
 
-#define STACK_MAX 1024
+#define STACK_MAX 4096
 #define MAX_CONSTANTS 1024
 #define MAX_GLOBALS 1024
-#define MAX_FUNCTIONS 256
-#define MAX_OBJECTS 256
+#define MAX_FUNCTIONS 1024
+#define MAX_OBJECTS 1024
 
 /* Bytecode Instructions */
 typedef enum {
     // OPCODE instructions (SYNTAX: OP (NO ARG))
-    OP_ADD,        // Add two values                            
-    OP_SUB,        // Sub two values (consistency of sub op)    
-    OP_MUL,        // Multiply                                  
-    OP_DIV,        // Divide                                    
-    OP_GET_GLOBAL, // Get a global variable                     
-    OP_SET_GLOBAL, // Set a global variable                     
-    OP_CALL,       // Call function                             
-    OP_RETURN,     // Return from function                      
-    OP_HALT,       // Stop execution                            
-    OP_JMP,        // JMP to an offset from current idx         
-    OP_JMPIF,      // false ? JMP to and offset from curr idx   
+    OP_ADD,        // Add two values
+    OP_SUB,        // Sub two values (consistency of sub op)
+    OP_MUL,        // Multiply
+    OP_DIV,        // Divide
+    OP_GET_GLOBAL, // Get a global variable
+    OP_SET_GLOBAL, // Set a global variable
+    OP_CALL,       // Call function
+    OP_RETURN,     // Return from function
+    OP_HALT,       // Stop execution
+    OP_JMP,        // JMP to an offset from current idx
+    OP_JMPIF,      // false ? JMP to and offset from curr idx
 
     // OPCODE primitives (SYNTAX: TYPE (ARG))
-    INT,           // prim obj int representation               
-    FLOAT,         // prim obj float representation             
-    BOOL,          // prim obj bool representation              
-    STR,           // prim obj str representation               
-    _NULL_,        // prim _NULL_ representation                
-    ID,            // ID representation                         
-    ID_FUNC,       // Function name/ID
+    INT,           // prim obj int representation
+    FLOAT,         // prim obj float representation
+    BOOL,          // prim obj bool representation
+    STR,           // prim obj str representation
+    _NULL_,        // prim _NULL_ representation
+    ID,            // ID representation [1 byte opcode][2 byte ID length][ ID length number of bytes]
 
     // OPCODE flags (SYNTAX: FLAG (NO ARG))
-    OP_FUNCDEF,    // Flag for start of function definition     
-    OP_ENDFUNC,    // Flag for end of function definition       
-    OP_CLASSDEF,   // Flag for start of class definition        
-    OP_ENDCLASS,  // Flag for end of class definition           
+    OP_FUNCDEF,    // Flag for start of function definition [1 byte]
+    OP_ENDFUNC,    // Flag for end of function definition [1 byte]
+    OP_CLASSDEF,   // Flag for start of class definition
+    OP_ENDCLASS,  // Flag for end of class definition
 
     // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
     OP_BLSHIFT,  // Bitwise left shift
@@ -52,22 +51,21 @@ typedef enum {
     OP_BAND,     // Bitwise AND
 
     // OPCODE local variables (SYNTAX: OP (NO ARG)) (I may remove these)
-    OP_GET_LOCAL,  // Get local variable                        
-    OP_SET_LOCAL,  // Set local variable                        
-    OP_DEFINE_LOCAL, // Define new local variable               
-    OP_ENTER_SCOPE, // Enter a new scope                        
+    OP_GET_LOCAL,  // Get local variable [1 byte]
+    OP_SET_LOCAL,  // Set local variable [1 byte]
+    LOCAL,        // Analogous to ID for local variables arguments [1 byte][2 bytes]
 
     // OPCODES standard functions
-    OP_PRINT,       // prints to stdout                         
-    OP_INPUT,       // gets values from stdin                   
+    OP_PRINT,       // prints to stdout
+    OP_INPUT,       // gets values from stdin
 
-    OP_MOD, 
-    OP_NEQ,
-    OP_EQ, 
-    OP_GEQ,
-    OP_GT,
-    OP_LEQ,
-    OP_LT
+    OP_MOD, // [1 byte]
+    OP_NEQ, // [1 byte]
+    OP_EQ, // [1 byte]
+    OP_GEQ, // [1 byte]
+    OP_GT, // [1 byte]
+    OP_LEQ,// [1 byte]
+    OP_LT // [1 byte]
 
 } OpCode;
 
@@ -78,7 +76,7 @@ typedef enum {
     PRIMITIVE_OBJ,
     ADVANCED_OBJ,
     FUNCTION_FRAME,
-    IDENTIFIER
+    IDENTIFIER,
 } StackEntryType;
 
 typedef struct StackEntry{
