@@ -17,56 +17,57 @@
 /* Bytecode Instructions */
 typedef enum {
     // OPCODE instructions (SYNTAX: OP (NO ARG))
-    OP_ADD,        // Add two values                            Binary: 0b 0000 0000
-    OP_SUB,        // Sub two values (consistency of sub op)    Binary: 0b 0000 0001
-    OP_MUL,        // Multiply                                  Binary: 0b 0000 0010
-    OP_DIV,        // Divide                                    Binary: 0b 0000 0011
-    OP_GET_GLOBAL, // Get a global variable                     Binary: 0b 0000 0100
-    OP_SET_GLOBAL, // Set a global variable                     Binary: 0b 0000 0101
-    OP_CALL,       // Call function                             Binary: 0b 0000 0110
-    OP_RETURN,     // Return from function                      Binary: 0b 0000 0111
-    OP_HALT,       // Stop execution                            Binary: 0b 0000 1000
-    OP_JMP,        // JMP to an offset from current idx         Binary: 0b 0000 1001
-    OP_JMPIF,      // false ? JMP to and offset from curr idx   Binary: 0b 0000 1010
+    OP_ADD,        // Add two values                            
+    OP_SUB,        // Sub two values (consistency of sub op)    
+    OP_MUL,        // Multiply                                  
+    OP_DIV,        // Divide                                    
+    OP_GET_GLOBAL, // Get a global variable                     
+    OP_SET_GLOBAL, // Set a global variable                     
+    OP_CALL,       // Call function                             
+    OP_RETURN,     // Return from function                      
+    OP_HALT,       // Stop execution                            
+    OP_JMP,        // JMP to an offset from current idx         
+    OP_JMPIF,      // false ? JMP to and offset from curr idx   
 
     // OPCODE primitives (SYNTAX: TYPE (ARG))
-    INT,           // prim obj int representation               Binary: 0b 0000 1011
-    FLOAT,         // prim obj float representation             Binary: 0b 0000 1100
-    BOOL,          // prim obj bool representation              Binary: 0b 0000 1101
-    STR,           // prim obj str representation               Binary: 0b 0000 1110
-    _NULL_,        // prim _NULL_ representation                Binary: 0b 0000 1111
-    ID,            // ID representation                         Binary: 0b 0001 0000
-    ID_FUNC,
+    INT,           // prim obj int representation               
+    FLOAT,         // prim obj float representation             
+    BOOL,          // prim obj bool representation              
+    STR,           // prim obj str representation               
+    _NULL_,        // prim _NULL_ representation                
+    ID,            // ID representation                         
+    ID_FUNC,       // Function name/ID
 
     // OPCODE flags (SYNTAX: FLAG (NO ARG))
-    OP_FUNCDEF,    // Flag for start of function definition     Binary: 0b 0001 0001
-    OP_ENDFUNC,    // Flag for end of function definition       Binary: 0b 0001 0010
-    OP_CLASSDEF,   // Flag for start of class definition        Binary: 0b 0001 0011
-    OP_ENDCLASS,  // Flag for end of class definition           Binary: 0b 0001 0100
+    OP_FUNCDEF,    // Flag for start of function definition     
+    OP_ENDFUNC,    // Flag for end of function definition       
+    OP_CLASSDEF,   // Flag for start of class definition        
+    OP_ENDCLASS,  // Flag for end of class definition           
 
     // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
-    OP_BLSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0101
-    OP_BRSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0110
-    OP_BXOR,     // Flag for end of class definition            Binary: 0b 0001 0111
-    OP_BOR,      // Flag for end of class definition            Binary: 0b 0001 1000
-    OP_BAND,     // Flag for end of class definition            Binary: 0b 0001 1001
+    OP_BLSHIFT,  // Bitwise left shift
+    OP_BRSHIFT,  // Bitwise right shift
+    OP_BXOR,     // Bitwise XOR
+    OP_BOR,      // Bitwise OR
+    OP_BAND,     // Bitwise AND
 
-    // OPCODE local variables (SYNTAX: OP (NO ARG))
-    OP_GET_LOCAL,  // Get local variable                        Binary: 0b 0001 1010
-    OP_SET_LOCAL,  // Set local variable                        Binary: 0b 0001 1011
-    OP_DEFINE_LOCAL, // Define new local variable               Binary: 0b 0001 1100
-    OP_ENTER_SCOPE, // Enter a new scope                        Binary: 0b 0001 1101
+    // OPCODE local variables (SYNTAX: OP (NO ARG)) (I may remove these)
+    OP_GET_LOCAL,  // Get local variable                        
+    OP_SET_LOCAL,  // Set local variable                        
+    OP_DEFINE_LOCAL, // Define new local variable               
+    OP_ENTER_SCOPE, // Enter a new scope                        
 
     // OPCODES standard functions
-    OP_PRINT,       // prints to stdout                         Binary: 0b 0001 1110
-    OP_INPUT,       // gets values from stdin                   Binary: 0b 0001 1111
+    OP_PRINT,       // prints to stdout                         
+    OP_INPUT,       // gets values from stdin                   
 
-    OP_MOD, // (TODO: Implement this in core primitives mengtek u dumb fuck)
+    OP_MOD, 
+    OP_NEQ,
     OP_EQ, 
     OP_GEQ,
-    OP_QE,
+    OP_GT,
     OP_LEQ,
-    OP_LE
+    OP_LT
 
 } OpCode;
 

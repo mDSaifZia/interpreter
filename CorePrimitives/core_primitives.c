@@ -105,8 +105,9 @@ void free_primitive(PrimitiveObject* object) {
         case TYPE_str:
             free(((str_Object*)object)->value); // Free the allocated string
             break;
+        case TYPE_bool:
         case TYPE_Null:
-            return; // Also just to be safe just incase free is ever called on Null
+            return; // Also just to be safe just incase free is ever called on Null or Bool
         default:
             break; 
     }
@@ -469,8 +470,6 @@ PrimitiveObject* mod_float(PrimitiveObject* self, PrimitiveObject* other) {
     return NULL;
 }
 
-// TODO change PrimtiveTypeNames[other->type] to PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]
-
 /* //////////////////////  OPERATOR: bitwise  ////////////////////// */
 
 PrimitiveObject* bitwise_XOR(PrimitiveObject* self, PrimitiveObject* other) {
@@ -527,3 +526,144 @@ PrimitiveObject* bitwise_LSHIFT(PrimitiveObject* self, PrimitiveObject* other) {
         PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
     return NULL;
 }
+
+/* //////////////////////  OPERATOR: ==  ////////////////////// */
+
+/*
+Supported between all types. 
+computes equality for int, float, bool
+returns (bool_Object false for NULL and str ALWAYS )
+*/
+int eq_int(PrimitiveObject* self, PrimitiveObject* other) {
+    int_Object * a = (int_Object *) self;
+    if (other->type == TYPE_int) {
+
+        return a->value == ((int_Object *) other)->value;
+
+    } else if (other->type == TYPE_float) {
+
+        return other->eq(other, self); // use the other's eq method if it is float as we need to have tolerance for floating point error
+    
+    } else if (other->type == TYPE_bool) {
+
+        return a->value == ((bool_Object *) other)->value;
+
+    } else {
+        return 0; // return False for NULL and str comparisons
+    }
+}
+
+/*
+
+*/
+int eq_float(PrimitiveObject* self, PrimitiveObject* other) {
+    double delta;
+    double epsilon = 0.0000001;
+    float_Object * a = (float_Object *) self;
+
+    if (other->type == TYPE_float) {
+
+        delta = a->value - ((float_Object *) other)->value;
+        return delta < epsilon;
+
+    } else if (other->type == TYPE_int) {
+
+        delta = a->value - ((int_Object *) other)->value;
+        return delta < epsilon;
+
+    } else if (other->type == TYPE_bool) {
+
+        delta = a->value - ((bool_Object *) other)->value;
+        return delta < epsilon;
+
+    } else {
+        return 0; 
+    }
+}
+
+int eq_bool(PrimitiveObject* self, PrimitiveObject* other) {
+
+}
+
+int eq_str(PrimitiveObject* self, PrimitiveObject* other) {
+
+}
+
+int eq_NULL(PrimitiveObject* self, PrimitiveObject* other) {
+    return (PrimitiveObject *) new_bool(other->type == TYPE_Null);
+}
+
+// /* //////////////////////  OPERATOR: >=  ////////////////////// */
+// PrimitiveObject* geq_int(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* geq_float(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* geq_bool(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* geq_str(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// /* //////////////////////  OPERATOR: !=  ////////////////////// */
+// PrimitiveObject* neq_int(PrimitiveObject* self, PrimitiveObject* other);
+// PrimitiveObject* neq_float(PrimitiveObject* self, PrimitiveObject* other);
+// PrimitiveObject* neq_bool(PrimitiveObject* self, PrimitiveObject* other);
+// PrimitiveObject* neq_str(PrimitiveObject* self, PrimitiveObject* other);
+// PrimitiveObject* neq_NULL(PrimitiveObject* self, PrimitiveObject* other);
+
+// /* //////////////////////  OPERATOR: <=  ////////////////////// */
+// PrimitiveObject* leq_int(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* leq_float(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* leq_bool(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* leq_str(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// /* //////////////////////  OPERATOR: >  ////////////////////// */
+// PrimitiveObject* gt_int(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* gt_float(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* gt_bool(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* gt_str(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// /* //////////////////////  OPERATOR: <  ////////////////////// */
+// PrimitiveObject* lt_int(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* lt_float(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* lt_bool(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }
+
+// PrimitiveObject* lt_str(PrimitiveObject* self, PrimitiveObject* other) {
+
+// }

@@ -46,45 +46,56 @@ VM * initVM() {
 }
 /* ///////////////////////// VM FUNCTIONS ///////////////////////// */
 // // OPCODE instructions (SYNTAX: OP (NO ARG))
-// OP_ADD,        // Add two values                            Binary: 0b 0000 0000 done
-// OP_SUB,        // Sub two values (consistency of sub op)    Binary: 0b 0000 0001 done
-// OP_MUL,        // Multiply                                  Binary: 0b 0000 0010 done
-// OP_DIV,        // Divide                                    Binary: 0b 0000 0011 done
-// OP_GET_GLOBAL, // Get a global variable                     Binary: 0b 0000 0100 done         
-// OP_SET_GLOBAL, // Set a global variable                     Binary: 0b 0000 0101 done
-// OP_CALL,       // Call function                             Binary: 0b 0000 0110 
-// OP_RETURN,     // Return from function                      Binary: 0b 0000 0111 
-// OP_HALT,       // Stop execution                            Binary: 0b 0000 1000 done
-// OP_JMP,        // JMP to an offset from current idx         Binary: 0b 0000 1001 done
-// OP_JMPIF,      // false ? JMP to and offset from curr idx   Binary: 0b 0000 1010 done 
+// OP_ADD,        // Add two values                            done
+// OP_SUB,        // Sub two values (consistency of sub op)    done
+// OP_MUL,        // Multiply                                  done
+// OP_DIV,        // Divide                                    done
+// OP_GET_GLOBAL, // Get a global variable                     done         
+// OP_SET_GLOBAL, // Set a global variable                     done
+// OP_CALL,       // Call function                              
+// OP_RETURN,     // Return from function                      
+// OP_HALT,       // Stop execution                            done
+// OP_JMP,        // JMP to an offset from current idx         done
+// OP_JMPIF,      // false ? JMP to and offset from curr idx   done 
 
 // // OPCODE primitives (SYNTAX: TYPE (ARG))
-// INT,           // prim obj int representation               Binary: 0b 0000 1011 done 
-// FLOAT,         // prim obj float representation             Binary: 0b 0000 1100 done
-// BOOL,          // prim obj bool representation              Binary: 0b 0000 1101 done 
-// STR,           // prim obj str representation               Binary: 0b 0000 1110 done 
-// _NULL_,        // prim _NULL_ representation (NO ARGS)      Binary: 0b 0000 1111 done
-// ID,            // ID representation                         Binary: 0b 0001 0000 done
+// INT,           // prim obj int representation               done 
+// FLOAT,         // prim obj float representation             done
+// BOOL,          // prim obj bool representation              done 
+// STR,           // prim obj str representation               done 
+// _NULL_,        // prim _NULL_ representation (NO ARGS)      done
+// ID,            // ID representation                         done
 
 // // OPCODE flags (SYNTAX: FLAG (NO ARG))
-// OP_FUNCDEF,    // Flag for start of function definition     Binary: 0b 0001 0001
-// OP_ENDFUNC,    // Flag for end of function definition       Binary: 0b 0001 0010
-// OP_CLASSDEF,   // Flag for start of class definition        Binary: 0b 0001 0011
-// OP_ENDCLASS,  // Flag for end of class definition           Binary: 0b 0001 0100
+// OP_FUNCDEF,    // Flag for start of function definition     
+// OP_ENDFUNC,    // Flag for end of function definition       
+// OP_CLASSDEF,   // Flag for start of class definition        
+// OP_ENDCLASS,  // Flag for end of class definition           
 
-// // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS)) -> INT ONLY
-// OP_BLSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0101
-// OP_BRSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0110
-// OP_BXOR,     // Flag for end of class definition            Binary: 0b 0001 0111
-// OP_BOR,      // Flag for end of class definition            Binary: 0b 0001 1000
-// OP_BAND,     // Flag for end of class definition            Binary: 0b 0001 1001
+// // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
+// OP_BLSHIFT,  // Flag for end of class definition            
+// OP_BRSHIFT,  // Flag for end of class definition            
+// OP_BXOR,     // Flag for end of class definition            
+// OP_BOR,      // Flag for end of class definition            
+// OP_BAND,     // Flag for end of class definition            
 
-// OP_mod, // (TODO: Implement this in core primitives mengtek u dumb fuck)
+// // OPCODE local variables (SYNTAX: OP (NO ARG))
+// OP_GET_LOCAL,  // Get local variable                        
+// OP_SET_LOCAL,  // Set local variable                        
+// OP_DEFINE_LOCAL, // Define new local variable               
+// OP_ENTER_SCOPE, // Enter a new scope                        
+
+// // OPCODES standard functions
+// OP_PRINT,       // prints to stdout                         
+// OP_INPUT,       // gets values from stdin                   
+
+// OP_MOD, 
+// OP_NEQ
 // OP_EQ, 
 // OP_GEQ,
-// OP_QE,
+// OP_GT,
 // OP_LEQ,
-// OP_LE
+// OP_LT
 
 /*
 INT, FLOAT -> read 8 bytes after opcode
@@ -249,7 +260,7 @@ void run(VM* vm, const char* bytecode_file) {
                 break;
             }
 
-            case OP_ADD: {
+            case OP_ADD: { // modify this to first check the constant table before attempting to create a new int
                 StackEntry b = pop(vm);
                 StackEntry a = pop(vm);
                 if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
@@ -261,7 +272,7 @@ void run(VM* vm, const char* bytecode_file) {
                 break;
             }
 
-            case OP_SUB: {
+            case OP_SUB: { // modify this to first check contain table before attempting to create a new int
                 StackEntry b = pop(vm);
                 StackEntry a = pop(vm);
                 if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
@@ -283,7 +294,7 @@ void run(VM* vm, const char* bytecode_file) {
                 break;
             }
     
-            case OP_MUL: {
+            case OP_MUL: { // modify this to first check constant table
                 StackEntry b = pop(vm);
                 StackEntry a = pop(vm);
                 if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
@@ -296,7 +307,7 @@ void run(VM* vm, const char* bytecode_file) {
             }
                 
 
-            case OP_DIV: {
+            case OP_DIV: { //modify this to first check the constant table
                 StackEntry b = pop(vm);
                 StackEntry a = pop(vm);
                 if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
