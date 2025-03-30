@@ -1,6 +1,12 @@
 /// This is a multi-line comment
  End of multi-line comment ///
 
+// Test builtin print function
+var string = "Hello World";
+print(string);
+print("Hello");
+print(100);
+
 // Test var declare w string
 var a = "hello";
 

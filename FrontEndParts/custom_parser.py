@@ -69,6 +69,8 @@ class Parser:
                     return self.parse_while_stmt()
                 case "return":
                     return self.parse_return_stmt()
+                case "print":
+                    return self.parse_print_stmt()
         # Check for assignment statement: identifier followed by ASSIGN.
         if token.type == "IDEN":
             next_token = self.peek()
@@ -79,6 +81,14 @@ class Parser:
             return self.parse_block()
         # Fallback: treat it as an expression statement.
         return self.parse_expression_stmt()
+    
+    def parse_print_stmt(self):     # Parse a print statement
+        self.consume("KEYWORD", "print")
+        self.consume("DELIMITER", "(")
+        expr = self.parse_expression()
+        self.consume("DELIMITER", ")")
+        self.consume("DELIMITER", ";")
+        return PrintStmt(expr)
 
     def parse_block(self):          # Parse a block of statements enclosed in curly braces {}, for functions or loops or if-else statements
         self.consume("DELIMITER", "{")

@@ -110,3 +110,9 @@ class BooleanLiteral(ASTNode):
         self.value = value
     def __repr__(self):
         return f"BooleanLiteral({self.value})"
+    
+class PrintStmt(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"PrintStmt({self.expr})"
