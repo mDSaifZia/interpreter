@@ -15,6 +15,8 @@ typedef struct { // Exactly the same as stackentry. Doing this to abstract from 
 
 typedef struct StackFrame {
   uint64_t *return_address; // stores the position of ip after op_call
+  size_t parent_base_pointer;  //stores location of parent stackframe in stack
+
   /*
     1.) Initialize locals array with null pointers to not get random values
     for uninitialized local variables and to throw an error.
@@ -27,7 +29,7 @@ typedef struct StackFrame {
 } StackFrame;
 
 // Initialize a new stack frame
-StackFrame *init_stack_frame(uint64_t *return_address, size_t local_count);
+StackFrame *init_stack_frame(VM *vm, uint64_t *return_address, size_t local_count);
 
 // Get a local variable from the current stack frame
 localEntry get_local(VM *vm, uint16_t index);
@@ -35,7 +37,7 @@ localEntry get_local(VM *vm, uint16_t index);
 // Set a local variable in the current stack frame
 void set_local(VM *vm, uint16_t index, StackEntry value);
 
-// Exit from the current stack frame (for function returns)
+// Return from the current stack frame (for function returns)
 void return_from_frame(VM *vm);
 
 // Free resources associated with a stack frame

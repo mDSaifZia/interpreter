@@ -4,7 +4,7 @@
 #include <string.h>
 
 // Initialize a new stack frame
-StackFrame *init_stack_frame(uint64_t *return_address, size_t local_count) {
+StackFrame *init_stack_frame(VM *vm, uint64_t *return_address, size_t local_count) {
   StackFrame *frame = malloc(sizeof(StackFrame));
   if (!frame) {
     printf("Failed to allocate memory for stack frame.\n");
@@ -13,6 +13,7 @@ StackFrame *init_stack_frame(uint64_t *return_address, size_t local_count) {
 
   frame->return_address = return_address;
   frame->local_count = local_count;
+  frame->parent_base_pointer = vm->stack.base_pointer;
   memset(frame->locals, 0, sizeof(frame->locals));
 
   return frame;
@@ -92,6 +93,7 @@ void return_from_frame(VM *vm) {
   // Overwrite the frame entry to return value
   push(vm, returnVal.value, returnVal.entry_type);
   vm->bytecode_ip = return_address;
+  vm->stack.base_pointer = frame->parent_base_pointer;
   free_stack_frame(frame);
 }
 
@@ -101,7 +103,7 @@ void free_stack_frame(StackFrame *frame) {
     // Free all allocated local entries
     for (int i = 0; i < frame->local_count; i++) {
       if (frame->locals[i]) {
-        free(frame->locals[i]);
+        free(frame->locals[i]); // Only freeing the local entries not the values
       }
     }
     free(frame);
