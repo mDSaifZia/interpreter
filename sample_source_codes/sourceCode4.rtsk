@@ -1,0 +1,17 @@
+/// This is a multi-line comment
+ spanning multiple lines.
+ End of multi-line comment ///
+// this is single line comment 
+
+var counter = 0;
+var x = 10;
+
+if (x > 0) {
+    counter = counter+1;
+} else if (x <0) { 
+    counter = counter - 1;
+} else if (x==0){
+    counter = counter + 2;
+} else {
+    var status = "low";
+}
