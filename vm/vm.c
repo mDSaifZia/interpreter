@@ -489,34 +489,35 @@ stack_top
       break;
     }
 
-    case OP_GET_LOCAL: { // [1 byte opcode][2 byte local index]
-      uint16_t index;
-      memcpy(&index, vm->bytecode_ip,
-             sizeof(uint16_t)); // Read 2 bytes for local index
-      vm->bytecode_ip =
-          (uint64_t *)((uint8_t *)vm->bytecode_ip +
-                       sizeof(uint16_t)); // Move past the index bytes
+    case OP_GET_LOCAL: { // [1 byte opcode]
+      StackEntry local_id = pop(vm);
 
+      if (local_id.entry_type != IDENTIFIER) {
+        printf("Error: Expected IDENTIFIER for local variable access.\n");
+        free(bytecode);
+        return;
+      }
+
+      uint16_t index = (uint16_t)(uintptr_t)local_id.value;
       localEntry local = get_local(vm, index);
-
       if (local.value != NULL) {
         push(vm, local.value, local.entry_type);
       } else {
-        printf("Error: Failed to get local variable at index %d.\n",
-               index); // TODO: Change to exit the stackframe because
-                       // trying to access variable at index failed
+        printf("Error: Failed to get local variable at index %d.\n", index);
         push(vm, get_constant(vm, _NULL_, 0), PRIMITIVE_OBJ);
       }
       break;
     }
 
-    case OP_SET_LOCAL: { // [1 byte opcode][2 byte local index]
-      uint16_t index;
-      memcpy(&index, vm->bytecode_ip,
-             sizeof(uint16_t)); // Read 2 bytes for local index
-      vm->bytecode_ip =
-          (uint64_t *)((uint8_t *)vm->bytecode_ip +
-                       sizeof(uint16_t)); // Move past the index bytes
+    case OP_SET_LOCAL: { // [1 byte opcode]
+      StackEntry local_id = pop(vm);
+
+      if (local_id.entry_type != IDENTIFIER) {
+        printf("Error: Expected IDENTIFIER for local variable assignment.\n");
+        free(bytecode);
+        return;
+      }
+      uint16_t index = (uint16_t)(uintptr_t)local_id.value;
 
       StackEntry value = pop(vm);
       set_local(vm, index, value);
@@ -537,111 +538,112 @@ stack_top
       break;
     }
 
-    case OP_FUNCDEF: {
-      // Read number of arguments (2 bytes)
-      uint16_t num_args;
-      memcpy(&num_args, vm->bytecode_ip, sizeof(uint16_t));
-      vm->bytecode_ip =
-          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));
-
-      // Read number of local variables (2 bytes)
-      uint16_t num_locals;
-      memcpy(&num_locals, vm->bytecode_ip, sizeof(uint16_t));
-      vm->bytecode_ip =
-          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));
-
-      // Next should be an ID opcode for function name
-      uint8_t id_opcode = *(uint8_t *)vm->bytecode_ip;
-      vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip + 1);
-
-      if (id_opcode != ID) {
-        printf("Error: Expected ID for function name after OP_FUNCDEF.\n");
-        break;
-      }
-
-      // Read function name length (2 bytes)
-      uint16_t name_length;
-      memcpy(&name_length, vm->bytecode_ip, sizeof(uint16_t));
-      vm->bytecode_ip =
-          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));
-
-      // Read function name
-      char *func_name = malloc(name_length + 1);
-      memcpy(func_name, vm->bytecode_ip, name_length);
-      func_name[name_length] = '\0';
-      vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip + name_length);
-
-      // Store the function in the function table
-      FunctionEntry *func_entry = malloc(sizeof(FunctionEntry));
-      if (!func_entry) {
-        printf("Error: Failed to allocate memory for function entry.\n");
-        free(func_name);
-        break;
-      }
-
-      func_entry->name = strdup(func_name);
-      func_entry->func_body_address =
-          (size_t)vm->bytecode_ip; // Current position is start of function body
-      func_entry->num_args = num_args;
-      func_entry->local_count = num_locals;
-
-      // Add to function hashmap
-      hashmap_set(vm->functions, func_name, func_entry, free);
-
-      // Skip to the OP_ENDFUNC for end of func body
-      while (1) {
-        uint8_t instruction = *(uint8_t *)vm->bytecode_ip;
-        vm->bytecode_ip =
-            (uint64_t *)((uint8_t *)vm->bytecode_ip +
-                         1); // This skips all the instruction OPCODES
-
-        if (instruction == OP_ENDFUNC) {
-          break; // Found the end of the function
-        }
-
-        // Skip instruction arguments based on opcode
-        switch (instruction) {
-        case INT:
-        case FLOAT:
-          vm->bytecode_ip =
-              (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(int64_t));
-          break;
-        case BOOL:
-          vm->bytecode_ip =
-              (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint8_t));
-          break;
-        case STR: {
-          uint32_t str_length;
-          memcpy(&str_length, vm->bytecode_ip, sizeof(uint32_t));
-          vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +
-                                         sizeof(uint32_t) + str_length);
-          break;
-        }
-        case ID: {
-          uint16_t id_length;
-          memcpy(&id_length, vm->bytecode_ip, sizeof(uint16_t));
-          vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +
-                                         sizeof(uint16_t) + id_length);
-          break;
-        }
-        case OP_JMP:
-        case OP_JMPIF:
-          vm->bytecode_ip =
-              (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(int32_t));
-          break;
-        case OP_GET_LOCAL:
-        case OP_SET_LOCAL:
-        case LOCAL:
-          vm->bytecode_ip =
-              (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));
-          break;
-          // TODO: Handle any other instructions with arguments if needed
-        }
-      }
-
-      free(func_name);
-      break;
-    }
+                //TODO: FUNC TABLE INITIALIZATION IS NOT TO BE HANDLED DURING VM EXECUTION
+    /*case OP_FUNCDEF: {*/
+    /*  // Read number of arguments (2 bytes)*/
+    /*  uint16_t num_args;*/
+    /*  memcpy(&num_args, vm->bytecode_ip, sizeof(uint16_t));*/
+    /*  vm->bytecode_ip =*/
+    /*      (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
+    /**/
+    /*  // Read number of local variables (2 bytes)*/
+    /*  uint16_t num_locals;*/
+    /*  memcpy(&num_locals, vm->bytecode_ip, sizeof(uint16_t));*/
+    /*  vm->bytecode_ip =*/
+    /*      (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
+    /**/
+    /*  // Next should be an ID opcode for function name*/
+    /*  uint8_t id_opcode = *(uint8_t *)vm->bytecode_ip;*/
+    /*  vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip + 1);*/
+    /**/
+    /*  if (id_opcode != ID) {*/
+    /*    printf("Error: Expected ID for function name after OP_FUNCDEF.\n");*/
+    /*    break;*/
+    /*  }*/
+    /**/
+    /*  // Read function name length (2 bytes)*/
+    /*  uint16_t name_length;*/
+    /*  memcpy(&name_length, vm->bytecode_ip, sizeof(uint16_t));*/
+    /*  vm->bytecode_ip =*/
+    /*      (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
+    /**/
+    /*  // Read function name*/
+    /*  char *func_name = malloc(name_length + 1);*/
+    /*  memcpy(func_name, vm->bytecode_ip, name_length);*/
+    /*  func_name[name_length] = '\0';*/
+    /*  vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip + name_length);*/
+    /**/
+    /*  // Store the function in the function table*/
+    /*  FunctionEntry *func_entry = malloc(sizeof(FunctionEntry));*/
+    /*  if (!func_entry) {*/
+    /*    printf("Error: Failed to allocate memory for function entry.\n");*/
+    /*    free(func_name);*/
+    /*    break;*/
+    /*  }*/
+    /**/
+    /*  func_entry->name = strdup(func_name);*/
+    /*  func_entry->func_body_address =*/
+    /*      (size_t)vm->bytecode_ip; // Current position is start of function body*/
+    /*  func_entry->num_args = num_args;*/
+    /*  func_entry->local_count = num_locals;*/
+    /**/
+    /*  // Add to function hashmap*/
+    /*  hashmap_set(vm->functions, func_name, func_entry, free);*/
+    /**/
+    /*  // Skip to the OP_ENDFUNC for end of func body*/
+    /*  while (1) {*/
+    /*    uint8_t instruction = *(uint8_t *)vm->bytecode_ip;*/
+    /*    vm->bytecode_ip =*/
+    /*        (uint64_t *)((uint8_t *)vm->bytecode_ip +*/
+    /*                     1); // This skips all the instruction OPCODES*/
+    /**/
+    /*    if (instruction == OP_ENDFUNC) {*/
+    /*      break; // Found the end of the function*/
+    /*    }*/
+    /**/
+    /*    // Skip instruction arguments based on opcode*/
+    /*    switch (instruction) {*/
+    /*    case INT:*/
+    /*    case FLOAT:*/
+    /*      vm->bytecode_ip =*/
+    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(int64_t));*/
+    /*      break;*/
+    /*    case BOOL:*/
+    /*      vm->bytecode_ip =*/
+    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint8_t));*/
+    /*      break;*/
+    /*    case STR: {*/
+    /*      uint32_t str_length;*/
+    /*      memcpy(&str_length, vm->bytecode_ip, sizeof(uint32_t));*/
+    /*      vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +*/
+    /*                                     sizeof(uint32_t) + str_length);*/
+    /*      break;*/
+    /*    }*/
+    /*    case ID: {*/
+    /*      uint16_t id_length;*/
+    /*      memcpy(&id_length, vm->bytecode_ip, sizeof(uint16_t));*/
+    /*      vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +*/
+    /*                                     sizeof(uint16_t) + id_length);*/
+    /*      break;*/
+    /*    }*/
+    /*    case OP_JMP:*/
+    /*    case OP_JMPIF:*/
+    /*      vm->bytecode_ip =*/
+    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(int32_t));*/
+    /*      break;*/
+    /*    case OP_GET_LOCAL:*/
+    /*    case OP_SET_LOCAL:*/
+    /*    case LOCAL:*/
+    /*      vm->bytecode_ip =*/
+    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
+    /*      break;*/
+    /*      // TODO: Handle any other instructions with arguments if needed*/
+    /*    }*/
+    /*  }*/
+    /**/
+    /*  free(func_name);*/
+    /*  break;*/
+    /*}*/
 
     case OP_CALL: {
       // Pop the function identifier from the stack
@@ -708,7 +710,8 @@ stack_top
     }
 
     case OP_ENDFUNC: {
-      // Just a marker for end of function, any return handling is done by OP_RETURN
+      // Just a marker for end of function, any return handling is done by
+      // OP_RETURN
       break;
     }
 
