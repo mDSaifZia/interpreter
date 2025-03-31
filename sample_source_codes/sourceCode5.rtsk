@@ -1,0 +1,24 @@
+/// This is a multi-line comment
+ spanning multiple lines.
+ End of multi-line comment ///
+// this is single line comment 
+
+// Test addition with parenthesis
+var x = (3+2) + 1;
+
+// Test subtraction with parenthesis
+x = 43-(2- 10);
+
+// Test div with parenthesis
+x = (20 / 10) / 5;
+
+// Test multi with parenthesis
+x = (8 * 5) * 9;
+
+// Test modulo with parenthesis
+x = (8 %2) %1;
+
+// Test combine arithmetic with parenthesis
+x = 6 * 5 + (4 - 9) /2;
+x = 2 + 3 - 5;
+x = (2 - 4) / 8;
