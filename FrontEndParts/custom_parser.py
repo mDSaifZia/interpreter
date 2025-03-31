@@ -182,11 +182,20 @@ class Parser:
         return node
     
     def parse_relational(self):
-        node = self.parse_bitwise_or()
+        node = self.parse_assignment()
         while self.current_token() and self.current_token().type == "RELATIONAL" and self.current_token().value in (">", "<", ">=", "<="):
             op = self.consume("RELATIONAL").value
-            right = self.parse_bitwise_or()
+            right = self.parse_assignment()
             node = BinaryOp(node, op, right)
+        return node
+    
+    def parse_assignment(self):
+        node = self.parse_bitwise_or()
+        if self.current_token() and self.current_token().type == "ASSIGN":
+            self.consume("ASSIGN")
+            # Right-associative: parse the right-hand side as an assignment.
+            right = self.parse_assignment()
+            node = Assignment(node, right)
         return node
 
     def parse_bitwise_or(self):

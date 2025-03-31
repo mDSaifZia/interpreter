@@ -62,3 +62,6 @@ x = 5.7;
 var z = x + x;
 var b = a;
 b = z;
+
+// Test associativity
+var aso = a = b = z = 78;
