@@ -44,16 +44,16 @@ float_Object* new_float(double value) {
     obj->base.add = (BinaryOp)add_float;
     obj->base.mul = (BinaryOp)mul_float;
     obj->base.div = (BinaryOp)div_float;
-    obj->base.mod = (BinaryOp)mod_float; 
+    obj->base.mod = (BinaryOp)mod_float;
     obj->value = (float) value;
 
     return obj;
 }
 
-/* 
+/*
 Constructor for bool_Object
 Returns a pointer to bool_Object struct inheriting from PrimitiveObject.
-Value of bool is equivilent to 1 (true) and 0 (false) 
+Value of bool is equivilent to 1 (true) and 0 (false)
 */
 bool_Object* new_bool(int bool_value) {
     bool_Object* obj = (bool_Object*)malloc(sizeof(bool_Object));
@@ -67,8 +67,8 @@ bool_Object* new_bool(int bool_value) {
     return obj;
 }
 
-/* 
-Constructor for str_Object 
+/*
+Constructor for str_Object
 Returns a pointer to str_Object struct inheriting from PrimitiveObject.
 Value holds a mutable char pointer.
 */
@@ -85,7 +85,7 @@ str_Object* new_str(const char* string_value) {
     return obj;
 }
 
-/* 
+/*
 Singleton instance for Null_Object
 */
 Null_Object* get_null() {
@@ -109,7 +109,7 @@ void free_primitive(PrimitiveObject* object) {
         case TYPE_Null:
             return; // Also just to be safe just incase free is ever called on Null or Bool
         default:
-            break; 
+            break;
     }
 
     free(object); // Free the object itself
@@ -127,13 +127,13 @@ PrimitiveObject* add_int(PrimitiveObject* self, PrimitiveObject* other) {
         case TYPE_float:
             return (PrimitiveObject*)new_float(((int_Object*)self)->value + ((float_Object*)other)->value);
 
-        case TYPE_bool: 
+        case TYPE_bool:
         case TYPE_int:
             return (PrimitiveObject*)new_int(((int_Object*)self)->value + ((int_Object*)other)->value);
 
         case TYPE_Null:
         case TYPE_str:
-            printf("Addition not supported between %s and %s\n", 
+            printf("Addition not supported between %s and %s\n",
                    PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
             return NULL; // Return NULL for more fine control over error handling
     }
@@ -143,7 +143,7 @@ PrimitiveObject* add_int(PrimitiveObject* self, PrimitiveObject* other) {
 
 /* Add function for float_Object */
 PrimitiveObject* add_float(PrimitiveObject* self, PrimitiveObject* other) {
-    if (!self || !other) return NULL; 
+    if (!self || !other) return NULL;
 
     switch (other->type) {
         case TYPE_int:
@@ -154,17 +154,17 @@ PrimitiveObject* add_float(PrimitiveObject* self, PrimitiveObject* other) {
 
         case TYPE_Null:
         case TYPE_str:
-            printf("Addition not supported between %s and %s\n", 
+            printf("Addition not supported between %s and %s\n",
                    PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
-            return NULL; 
+            return NULL;
     }
 
-    return NULL; 
+    return NULL;
 }
 
 /* Add function for bool_Object */
 PrimitiveObject* add_bool(PrimitiveObject* self, PrimitiveObject* other) {
-    if (!self || !other) return NULL; 
+    if (!self || !other) return NULL;
 
     switch (other->type) {
         case TYPE_bool:
@@ -176,19 +176,19 @@ PrimitiveObject* add_bool(PrimitiveObject* self, PrimitiveObject* other) {
 
         case TYPE_Null:
         case TYPE_str:
-            printf("Addition not supported between %s and %s\n", 
+            printf("Addition not supported between %s and %s\n",
                    PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
-            return NULL; 
+            return NULL;
     }
 
-    return NULL; 
+    return NULL;
 
 }
 
 /* Add function for str_Object */
 PrimitiveObject* add_str(PrimitiveObject* self, PrimitiveObject* other) {
 
-    if (!self || !other) return NULL; 
+    if (!self || !other) return NULL;
 
     if (other->type == TYPE_str) {
         char * str1 = ((str_Object *) self)->value;
@@ -197,7 +197,7 @@ PrimitiveObject* add_str(PrimitiveObject* self, PrimitiveObject* other) {
         size_t len1 = strlen(str1);
         size_t len2 = strlen(str2);
         if (len1 > SIZE_MAX - len2 - 1) { // Ensure that the concat operation is within bounds of a uint
-            printf("Error: String concatenation size exceeds limit.\n"); 
+            printf("Error: String concatenation size exceeds limit.\n");
             return NULL;
         }
 
@@ -212,10 +212,10 @@ PrimitiveObject* add_str(PrimitiveObject* self, PrimitiveObject* other) {
         free(new_str_val);                       // intended behaviour is for a new str to be instantiated when operators are applied onto it
         return (PrimitiveObject*)res;
     }
-        
-    printf("Addition not supported between %s and %s\n", 
+
+    printf("Addition not supported between %s and %s\n",
             PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
-    return NULL; 
+    return NULL;
 }
 
 /* //////////////////////  OPERATOR: mul  //////////////////////// */
@@ -285,7 +285,7 @@ PrimitiveObject* mul_float(PrimitiveObject* self, PrimitiveObject* other) {
             return (PrimitiveObject*)new_float(((float_Object*)self)->value * ((bool_Object*)other)->value);
 
         case TYPE_int:
-            return (PrimitiveObject*)new_float(((float_Object*)self)->value * ((int_Object*)other)->value); 
+            return (PrimitiveObject*)new_float(((float_Object*)self)->value * ((int_Object*)other)->value);
 
         case TYPE_str:
         case TYPE_Null:
@@ -306,7 +306,7 @@ PrimitiveObject* mul_bool(PrimitiveObject* self, PrimitiveObject* other) {
             return (PrimitiveObject*)new_float(((bool_Object*)self)->value * ((float_Object*)other)->value);
 
         case TYPE_bool:
-            return (PrimitiveObject*)new_int(((bool_Object*)self)->value && ((bool_Object*)other)->value); 
+            return (PrimitiveObject*)new_int(((bool_Object*)self)->value && ((bool_Object*)other)->value);
 
         case TYPE_int:
             return (PrimitiveObject*)new_int(((bool_Object*)self)->value * ((int_Object*)other)->value);
@@ -341,7 +341,7 @@ PrimitiveObject* mul_str(PrimitiveObject* self, PrimitiveObject* other) {
                    PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
             return NULL;
     }
- 
+
     return NULL;
 }
 
@@ -360,7 +360,7 @@ PrimitiveObject* div_int(PrimitiveObject* self, PrimitiveObject* other) {
                 printf("Error: Division by zero is not allowed.\n");
                 return NULL;
             }
-            if (a->value % b->value == 0) { 
+            if (a->value % b->value == 0) {
                 return (PrimitiveObject *)new_int(a->value / b->value);
             }
             return (PrimitiveObject *)new_float((double)a->value / b->value);
@@ -382,7 +382,7 @@ PrimitiveObject* div_int(PrimitiveObject* self, PrimitiveObject* other) {
                    PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
             return NULL;
     }
- 
+
     return NULL;
 }
 
@@ -418,7 +418,7 @@ PrimitiveObject* div_float(PrimitiveObject* self, PrimitiveObject* other) {
                    PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
             return NULL;
     }
- 
+
     return NULL;
 }
 
@@ -438,11 +438,11 @@ PrimitiveObject* mod_int(PrimitiveObject* self, PrimitiveObject* other) {
             return (PrimitiveObject *) new_int(a->value % b->value);
 
         default:
-            printf("Modulo not supported between %s and %s\n", 
+            printf("Modulo not supported between %s and %s\n",
                     PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
             return NULL;
     }
- 
+
     return NULL;
 }
 
@@ -462,11 +462,11 @@ PrimitiveObject* mod_float(PrimitiveObject* self, PrimitiveObject* other) {
             return (PrimitiveObject *) new_float(a->value - b->value * floor(a->value/b->value));
 
         default:
-            printf("Modulo not supported between %s and %s\n", 
+            printf("Modulo not supported between %s and %s\n",
                     PrimitiveTypeNames[self->type], PrimitiveTypeNames[other->type]);
             return NULL;
     }
- 
+
     return NULL;
 }
 
@@ -478,7 +478,7 @@ PrimitiveObject* bitwise_XOR(PrimitiveObject* self, PrimitiveObject* other) {
         int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
         return (PrimitiveObject *) new_int(a->value ^ b->value);
     }
-    printf("Integer bitwise XOR not supported between %s and %s\n", 
+    printf("Integer bitwise XOR not supported between %s and %s\n",
         PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
     return NULL;
 }
@@ -489,9 +489,9 @@ PrimitiveObject* bitwise_AND(PrimitiveObject* self, PrimitiveObject* other) {
         int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
         return (PrimitiveObject *) new_int(a->value & b->value);
     }
-    printf("Integer bitwise XOR not supported between %s and %s\n", 
+    printf("Integer bitwise XOR not supported between %s and %s\n",
         PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
-    return NULL; 
+    return NULL;
 }
 
 PrimitiveObject* bitwise_OR(PrimitiveObject* self, PrimitiveObject* other) {
@@ -500,7 +500,7 @@ PrimitiveObject* bitwise_OR(PrimitiveObject* self, PrimitiveObject* other) {
         int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
         return (PrimitiveObject *) new_int(a->value | b->value);
     }
-    printf("Integer bitwise XOR not supported between %s and %s\n", 
+    printf("Integer bitwise XOR not supported between %s and %s\n",
         PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
     return NULL;
 }
@@ -511,7 +511,7 @@ PrimitiveObject* bitwise_RSHIFT(PrimitiveObject* self, PrimitiveObject* other) {
         int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
         return (PrimitiveObject *) new_int(a->value >> b->value);
     }
-    printf("Integer bitwise XOR not supported between %s and %s\n", 
+    printf("Integer bitwise XOR not supported between %s and %s\n",
         PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
     return NULL;
 }
@@ -522,7 +522,7 @@ PrimitiveObject* bitwise_LSHIFT(PrimitiveObject* self, PrimitiveObject* other) {
         int_Object * b = (int_Object *) other; // We will treat bool (int_8) and int (int_64) as an int_object in this case as their values are prepresented by ints
         return (PrimitiveObject *) new_int(a->value << b->value);
     }
-    printf("Integer bitwise XOR not supported between %s and %s\n", 
+    printf("Integer bitwise XOR not supported between %s and %s\n",
         PrimitiveTypeNames[self->type], PrimitiveTypeNames[(other->type >= TYPE_int && other->type <= TYPE_Null)? other->type:5 ]);
     return NULL;
 }
@@ -530,7 +530,7 @@ PrimitiveObject* bitwise_LSHIFT(PrimitiveObject* self, PrimitiveObject* other) {
 /* //////////////////////  OPERATOR: ==  ////////////////////// */
 
 /*
-Supported between all types. 
+Supported between all types.
 computes equality for int, float, bool
 returns (bool_Object false for NULL and str ALWAYS )
 */
@@ -543,7 +543,7 @@ int eq_int(PrimitiveObject* self, PrimitiveObject* other) {
     } else if (other->type == TYPE_float) {
 
         return other->eq(other, self); // use the other's eq method if it is float as we need to have tolerance for floating point error
-    
+
     } else if (other->type == TYPE_bool) {
 
         return a->value == ((bool_Object *) other)->value;
@@ -577,7 +577,7 @@ int eq_float(PrimitiveObject* self, PrimitiveObject* other) {
         return delta < epsilon;
 
     } else {
-        return 0; 
+        return 0;
     }
 }
 
@@ -590,7 +590,7 @@ int eq_str(PrimitiveObject* self, PrimitiveObject* other) {
 }
 
 int eq_NULL(PrimitiveObject* self, PrimitiveObject* other) {
-    return (PrimitiveObject *) new_bool(other->type == TYPE_Null);
+    return new_bool(other->type == TYPE_Null)->value;
 }
 
 // /* //////////////////////  OPERATOR: >=  ////////////////////// */

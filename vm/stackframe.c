@@ -91,10 +91,15 @@ void return_from_frame(VM *vm) {
   // Reset stack top to base pointer
   vm->stack.stack_top = vm->stack.base_pointer;
   // Overwrite the frame entry to return value
+  /*printf("Entry_type:%d\n", returnVal.entry_type);*/
+  /*printf("Entry_val:%ld\n", ((int_Object *)returnVal.value)->value);*/
   push(vm, returnVal.value, returnVal.entry_type);
+
   vm->bytecode_ip = return_address;
   vm->stack.base_pointer = frame->parent_base_pointer;
   free_stack_frame(frame);
+  frame = NULL;
+
 }
 
 // Free resources associated with a stack frame

@@ -105,7 +105,7 @@ typedef struct GlobalEntry{
 
 typedef struct {
     char *name;       // Function name
-    size_t func_body_address; // Start of function in bytecode
+    size_t func_body_address; // Location of first instruction in body
     int num_args;      //Need to know number of arguments to pop out during OP_CALL
     int local_count;    //Number of local variables (including arguments)
 } FunctionEntry;
@@ -121,12 +121,23 @@ typedef struct {
 
 /* /////////////////////////////// OBJECT TABLE /////////////////////////////// */
 
+/* /////////////////////////////// HEADER /////////////////////////////// */
+
+typedef struct {
+  size_t func_section_start; // Start location of function section
+  size_t func_section_end;   // End location of function section
+  size_t class_section_start; // Start location of class section
+  size_t class_section_end;   // End location of class section
+  size_t execution_section_start;   // Start location of bytecode that is executed
+  uint8_t padding[24];         // 24 bytes of padding
+} BytecodeHeader;
+
+/* /////////////////////////////// HEADER /////////////////////////////// */
+
+
 /* VM Structure */
 typedef struct {
     Stack stack;  // stack to store entries
-
-    /*FunctionEntry functions[MAX_FUNCTIONS]; // Function table (subject to change as we just implemented hashmaps)*/
-    /*int functionCount;*/
 
     ObjectEntry objects[MAX_OBJECTS]; // Object table (subject to change as we just implemented hashmaps)
     int objectCount;

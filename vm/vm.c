@@ -163,6 +163,93 @@ PrimitiveObject *get_constant(VM *vm, OpCode opcode, int64_t value) {
   }
 }
 
+/* Function to load function definitions from bytecode */
+void load_functions(VM *vm, uint8_t *bytecode, size_t func_section_start,
+                    size_t func_section_end) {
+
+  uint8_t *function_section = bytecode + func_section_start;
+  uint8_t *section_end = bytecode + func_section_end;
+
+  // No functions declared
+  if (section_end - function_section == 0) {
+    return;
+  }
+
+  while (function_section < section_end) {
+    if (*function_section != OP_FUNCDEF) {
+      printf("Error: Expected function definition flag.\n");
+      return;
+    }
+    function_section++; // Move past OP_FUNCDEF byte
+
+    // Read num_args (2 bytes)
+    uint16_t num_args;
+    memcpy(&num_args, function_section, sizeof(uint16_t));
+    function_section += sizeof(uint16_t);
+
+    // Read num_var (aka local_count) (2 bytes)
+    uint16_t local_count;
+    memcpy(&local_count, function_section, sizeof(uint16_t));
+    function_section += sizeof(uint16_t);
+
+    // Read function ID opcode
+    if (*function_section != ID) {
+      printf("Error: Expected ID opcode for function name.\n");
+      return;
+    }
+    function_section++; // Move past ID opcode
+
+    // Read function name length (2 bytes)
+    uint16_t name_length;
+    memcpy(&name_length, function_section, sizeof(uint16_t));
+    function_section += sizeof(uint16_t);
+
+    // Read function name
+    char *func_name = malloc(name_length + 1);
+    memcpy(func_name, function_section, name_length);
+    func_name[name_length] = '\0'; // Null terminate
+    function_section += name_length;
+
+    // Create function entry
+    FunctionEntry *func_entry = malloc(sizeof(FunctionEntry));
+    if (!func_entry) {
+      printf("Error: Failed to allocate memory for function entry.\n");
+      free(func_name);
+      return;
+    }
+
+    func_entry->name = strdup(func_name);
+    func_entry->num_args = num_args;
+    func_entry->local_count = local_count;
+
+    // Store the current ip (start of function body)
+    func_entry->func_body_address = (size_t)function_section;
+
+    // Add to function table
+    hashmap_set(vm->functions, func_name, func_entry, free);
+
+    // Free the temporary function name
+    free(func_name);
+
+    // Function_end points to current location in function body
+    uint8_t *function_end = function_section;
+    while (function_end < section_end && *function_end != OP_ENDFUNC) {
+      function_end++;
+    }
+
+    // Move to the next function definition
+    function_section = function_end;
+
+    // Skip past OP_ENDFUNC
+    if (function_section < section_end && *function_section == OP_ENDFUNC) {
+      function_section++;
+    } else {
+      printf("Warning: End of function marker not found for %s.\n",
+             func_entry->name);
+    }
+  }
+}
+
 /* runs the vm */
 void run(VM *vm, const char *bytecode_file) {
   FILE *file = fopen(bytecode_file, "rb");
@@ -189,7 +276,17 @@ void run(VM *vm, const char *bytecode_file) {
   vm->bytecode_ip = (uint64_t *)bytecode; // Cast to match existing struct, but
                                           // must careful with byte addressing
 
-  // add in the header reading here
+  // Read header (64 bytes)
+  BytecodeHeader header;
+  memcpy(&header, bytecode, sizeof(BytecodeHeader));
+
+  /*printf("just checking if header has been read\n");*/
+
+  load_functions(vm, bytecode, header.func_section_start,
+                 header.func_section_end);
+
+  // Set instruction pointer to start of executable code section
+  vm->bytecode_ip = (uint64_t *)(bytecode + header.execution_section_start);
 
   while (1) {
     uint8_t instruction =
@@ -306,41 +403,48 @@ void run(VM *vm, const char *bytecode_file) {
       break;
     }
 
-    case OP_SUB: { // modify this to first check contain table before attempting
-                   // to create a new int
+    case OP_SUB: {
       StackEntry b = pop(vm);
       StackEntry a = pop(vm);
+
       if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
+        PrimitiveObject *a_obj = (PrimitiveObject *)a.value;
+        PrimitiveObject *b_obj = (PrimitiveObject *)b.value;
 
-        if (((PrimitiveObject *)b.value)->type != TYPE_int ||
-            ((PrimitiveObject *)b.value)->type !=
-                TYPE_float) { // subtraction only supported between ints and
-                              // floats by default
-          printf("Error: Invalid types for SUB operation.\n");
-        } else {
+        // Check if b is of type INT or FLOAT
+        if ((b_obj->type == TYPE_int || b_obj->type == TYPE_float)) {
 
-          // ensure that c applies the negative appropriately
-          if (((PrimitiveObject *)b.value)->type != TYPE_int)
-            ((int_Object *)b.value)->value *= -1;
-          else
-            ((float_Object *)b.value)->value *= -1;
+          // Create a copy of b to negate
+          PrimitiveObject *negated_b;
 
-          PrimitiveObject *result =
-              ((PrimitiveObject *)a.value)
-                  ->add(((PrimitiveObject *)a.value),
-                        ((PrimitiveObject *)b.value)); // cast back to primitive
+          if (b_obj->type == TYPE_int) {
+            // Create a negated copy of the int
+            int64_t negated_value = -(((int_Object *)b_obj)->value);
+            negated_b = (PrimitiveObject *)new_int(negated_value);
+          } else { // TYPE_float
+            // Create a negated copy of the float
+            double negated_value = -(((float_Object *)b_obj)->value);
+            negated_b = (PrimitiveObject *)new_float(negated_value);
+          }
+
+          /*printf("%ld\n", ((int_Object *)a_obj)->value);*/
+          /*printf("%ld\n", ((int_Object *)negated_b)->value);*/
+          // Now add a and negated_b
+          PrimitiveObject *result = a_obj->add(a_obj, negated_b);
+          /*printf("%ld\n", ((int_Object *)result)->value);*/
+          /*printf("%d\n", result->type);*/
           push(vm, result, PRIMITIVE_OBJ);
+
+          // If negated_b isn't in the constant pool, we should free it
+          // This would require tracking if it came from the constant pool
+        } else {
+          printf("Error: Subtraction only supported between numeric types.\n");
         }
       } else {
-        printf("Error: Invalid types for SUB operation.\n"); // just disallowing
-                                                             // other types of
-                                                             // additions first
-                                                             // but it can be
-                                                             // implemented
+        printf("Error: Invalid types for SUB operation.\n");
       }
       break;
     }
-
     case OP_MUL: { // modify this to first check constant table
       StackEntry b = pop(vm);
       StackEntry a = pop(vm);
@@ -494,8 +598,7 @@ stack_top
 
       if (local_id.entry_type != IDENTIFIER) {
         printf("Error: Expected IDENTIFIER for local variable access.\n");
-        free(bytecode);
-        return;
+        break;
       }
 
       uint16_t index = (uint16_t)(uintptr_t)local_id.value;
@@ -504,7 +607,8 @@ stack_top
         push(vm, local.value, local.entry_type);
       } else {
         printf("Error: Failed to get local variable at index %d.\n", index);
-        push(vm, get_constant(vm, _NULL_, 0), PRIMITIVE_OBJ);
+        free(bytecode);
+        return;
       }
       break;
     }
@@ -538,113 +642,6 @@ stack_top
       break;
     }
 
-                //TODO: FUNC TABLE INITIALIZATION IS NOT TO BE HANDLED DURING VM EXECUTION
-    /*case OP_FUNCDEF: {*/
-    /*  // Read number of arguments (2 bytes)*/
-    /*  uint16_t num_args;*/
-    /*  memcpy(&num_args, vm->bytecode_ip, sizeof(uint16_t));*/
-    /*  vm->bytecode_ip =*/
-    /*      (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
-    /**/
-    /*  // Read number of local variables (2 bytes)*/
-    /*  uint16_t num_locals;*/
-    /*  memcpy(&num_locals, vm->bytecode_ip, sizeof(uint16_t));*/
-    /*  vm->bytecode_ip =*/
-    /*      (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
-    /**/
-    /*  // Next should be an ID opcode for function name*/
-    /*  uint8_t id_opcode = *(uint8_t *)vm->bytecode_ip;*/
-    /*  vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip + 1);*/
-    /**/
-    /*  if (id_opcode != ID) {*/
-    /*    printf("Error: Expected ID for function name after OP_FUNCDEF.\n");*/
-    /*    break;*/
-    /*  }*/
-    /**/
-    /*  // Read function name length (2 bytes)*/
-    /*  uint16_t name_length;*/
-    /*  memcpy(&name_length, vm->bytecode_ip, sizeof(uint16_t));*/
-    /*  vm->bytecode_ip =*/
-    /*      (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
-    /**/
-    /*  // Read function name*/
-    /*  char *func_name = malloc(name_length + 1);*/
-    /*  memcpy(func_name, vm->bytecode_ip, name_length);*/
-    /*  func_name[name_length] = '\0';*/
-    /*  vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip + name_length);*/
-    /**/
-    /*  // Store the function in the function table*/
-    /*  FunctionEntry *func_entry = malloc(sizeof(FunctionEntry));*/
-    /*  if (!func_entry) {*/
-    /*    printf("Error: Failed to allocate memory for function entry.\n");*/
-    /*    free(func_name);*/
-    /*    break;*/
-    /*  }*/
-    /**/
-    /*  func_entry->name = strdup(func_name);*/
-    /*  func_entry->func_body_address =*/
-    /*      (size_t)vm->bytecode_ip; // Current position is start of function body*/
-    /*  func_entry->num_args = num_args;*/
-    /*  func_entry->local_count = num_locals;*/
-    /**/
-    /*  // Add to function hashmap*/
-    /*  hashmap_set(vm->functions, func_name, func_entry, free);*/
-    /**/
-    /*  // Skip to the OP_ENDFUNC for end of func body*/
-    /*  while (1) {*/
-    /*    uint8_t instruction = *(uint8_t *)vm->bytecode_ip;*/
-    /*    vm->bytecode_ip =*/
-    /*        (uint64_t *)((uint8_t *)vm->bytecode_ip +*/
-    /*                     1); // This skips all the instruction OPCODES*/
-    /**/
-    /*    if (instruction == OP_ENDFUNC) {*/
-    /*      break; // Found the end of the function*/
-    /*    }*/
-    /**/
-    /*    // Skip instruction arguments based on opcode*/
-    /*    switch (instruction) {*/
-    /*    case INT:*/
-    /*    case FLOAT:*/
-    /*      vm->bytecode_ip =*/
-    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(int64_t));*/
-    /*      break;*/
-    /*    case BOOL:*/
-    /*      vm->bytecode_ip =*/
-    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint8_t));*/
-    /*      break;*/
-    /*    case STR: {*/
-    /*      uint32_t str_length;*/
-    /*      memcpy(&str_length, vm->bytecode_ip, sizeof(uint32_t));*/
-    /*      vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +*/
-    /*                                     sizeof(uint32_t) + str_length);*/
-    /*      break;*/
-    /*    }*/
-    /*    case ID: {*/
-    /*      uint16_t id_length;*/
-    /*      memcpy(&id_length, vm->bytecode_ip, sizeof(uint16_t));*/
-    /*      vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +*/
-    /*                                     sizeof(uint16_t) + id_length);*/
-    /*      break;*/
-    /*    }*/
-    /*    case OP_JMP:*/
-    /*    case OP_JMPIF:*/
-    /*      vm->bytecode_ip =*/
-    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(int32_t));*/
-    /*      break;*/
-    /*    case OP_GET_LOCAL:*/
-    /*    case OP_SET_LOCAL:*/
-    /*    case LOCAL:*/
-    /*      vm->bytecode_ip =*/
-    /*          (uint64_t *)((uint8_t *)vm->bytecode_ip + sizeof(uint16_t));*/
-    /*      break;*/
-    /*      // TODO: Handle any other instructions with arguments if needed*/
-    /*    }*/
-    /*  }*/
-    /**/
-    /*  free(func_name);*/
-    /*  break;*/
-    /*}*/
-
     case OP_CALL: {
       // Pop the function identifier from the stack
       StackEntry func_id = pop(vm);
@@ -661,10 +658,11 @@ stack_top
       if (!func) {
         printf("Error: Undefined function '%s'.\n", func_name);
         free(func_name);
-        break;
+        free(bytecode);
+        return;
       }
 
-      // Pop arguments from the stack (in reverse order)
+      // Pop and assign arguments from the stack (in reverse order)
       StackEntry args[func->num_args];
       for (int i = func->num_args - 1; i >= 0; i--) {
         args[i] = pop(vm);
@@ -691,27 +689,19 @@ stack_top
       // Update the base pointer to the new stack frame
       vm->stack.base_pointer = new_base_pointer;
 
-      // Set the arguments as local variables in the stack frame
+      // Set the arguments as local variables in the stack frame.
       for (int i = 0; i < func->num_args; i++) {
         set_local(vm, i, args[i]);
       }
 
       // Jump to function body
       vm->bytecode_ip = (uint64_t *)func->func_body_address;
-
       free(func_name);
       break;
     }
 
     case OP_RETURN: {
-      // The return value should already be on the stack
       return_from_frame(vm);
-      break;
-    }
-
-    case OP_ENDFUNC: {
-      // Just a marker for end of function, any return handling is done by
-      // OP_RETURN
       break;
     }
 
@@ -737,10 +727,11 @@ void push(VM *vm, void *value, StackEntryType type) {
 
   if (stack->stack_top < STACK_MAX) { // Check stack limit
     stack->stack[stack->stack_top] = entry;
-    stack->stack_top++;
+    /*printf("Stack top: %ld\n", stack->stack_top);*/
+        stack->stack_top++;
   } else {
     printf("Stack overflow error.\n");
-    return;
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -755,7 +746,7 @@ StackEntry pop(VM *vm) {
     return errorEntry;
   }
 
-  stack->stack_top--;                    // Move stack top down
+  stack->stack_top--; // Move stack top down
   return stack->stack[stack->stack_top]; // Return the popped entry
 }
 
