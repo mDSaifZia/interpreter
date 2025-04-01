@@ -1,5 +1,5 @@
 import argparse
-# from custom_semantic_checker import SemanticChecker
+from custom_semantic_checker import SemanticChecker
 from custom_lexer import Lexer
 from custom_parser import Parser
 
@@ -29,13 +29,13 @@ def main():
     print("\nAST:")
     print(ast)
 
-    #Semantic Analysis
-    # checker = SemanticChecker(ast)
-    # try:
-    #     checker.check(ast)
-    #     print("Semantic Analysis: PASS")
-    # except Exception as e:
-    #     print(f"Semantic Analysis: FAIL ({e})")
+    # Semantic Analysis
+    checker = SemanticChecker()
+    try:
+        checker.check(ast)
+        print("Semantic Analysis: PASS")
+    except Exception as e:
+        print(f"Semantic Analysis: FAIL ({e})")
 
 if __name__ == '__main__':
     main()
