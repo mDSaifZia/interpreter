@@ -65,3 +65,5 @@ b = z;
 
 // Test associativity
 var aso = a = b = z = 78;
+aso = b = 89;
+aso = b;

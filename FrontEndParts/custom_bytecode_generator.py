@@ -7,6 +7,7 @@ class BytecodeGenerator:
         self.in_function = False     # Flag indicating if we are generating a function.
         self.locals = None           # For function scope: maps variable name -> local index.
 
+    # =============================== HElper functions ===============================
     def get_instruction_size(self, instruction):
         """
         Compute the size (in bytes) of a single instruction line based on the starting opcode.
@@ -185,6 +186,9 @@ class BytecodeGenerator:
 
     def visit_Program(self, node):
         for stmt in node.statements:
+            # For global scope
+            if (stmt.__class__.__name__ == "Assignment"): # If the assignment is a top-level assignment, we need to set it as such to prevent additional OP_GET
+                stmt.top_level_assignment = True
             self.visit(stmt)
 
     def visit_VarDecl(self, node):
@@ -203,9 +207,18 @@ class BytecodeGenerator:
             idx = self.locals[node.left.name]
             self.bytecodes.append(f"LOCAL {idx}")
             self.bytecodes.append("OP_SET_LOCAL")
+            # Push the value back for assignment chaining, unless it is top-level assignment which will be handled in visit_Program.
+            if node.top_level_assignment == False:
+                self.bytecodes.append(f"LOCAL {idx}")
+                self.bytecodes.append("OP_GET_LOCAL")
         else:
             self.bytecodes.append(f"ID {len(node.left.name)} {node.left.name}")
-            self.bytecodes.append("OP_SET_GLOBAL")
+            self.bytecodes.append("OP_SET_GLOBAL")   
+            # Push the value back for assignment chaining.
+            if node.top_level_assignment == False:
+                self.bytecodes.append(f"ID {len(node.left.name)} {node.left.name}")
+                self.bytecodes.append("OP_GET_GLOBAL")
+
 
     def visit_Literal(self, node):
         if isinstance(node.value, int):
@@ -274,6 +287,9 @@ class BytecodeGenerator:
 
     def visit_Block(self, node):
         for stmt in node.statements:
+            # For local scope
+            if (stmt.__class__.__name__ == "Assignment"): # If the assignment is a top-level assignment, we need to set it as such to prevent additional OP_GET
+                stmt.top_level_assignment = True
             self.visit(stmt)
 
     def visit_IfStmt(self, node):
