@@ -88,6 +88,7 @@ class Assignment(ASTNode):  # Assignment operation e.g. a = 5
     def __init__(self, left, right):
         self.left = left
         self.right = right
+        self.top_level_assignment = False
     def __repr__(self):
         return f"Assignment({self.left}, {self.right})"
     
@@ -104,3 +105,15 @@ class ReturnStmt(ASTNode):
         self.expr = expr
     def __repr__(self):
         return f"ReturnStmt({self.expr})"
+    
+class BooleanLiteral(ASTNode):
+    def __init__(self, value):
+        self.value = value
+    def __repr__(self):
+        return f"BooleanLiteral({self.value})"
+    
+class PrintStmt(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"PrintStmt({self.expr})"

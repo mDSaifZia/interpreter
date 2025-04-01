@@ -14,7 +14,7 @@ class Lexer:
     def __init__(self, code):
         self.code = code
         self.line = 1
-        self.keywords = {"if", "else", "while", "return", "fn", "var", "loop", "from", "import"}
+        self.keywords = {"if", "else", "while", "return", "fn", "var", "loop", "from", "print"}
         self.token_specification = [
             ('MANY_LINE_COMMENT', r'///(.*)///'),   # Greedy match for multi-line comments
             ('ONE_LINE_COMMENT',  r'//[^\n]*'),      # Match until newline only
@@ -22,9 +22,15 @@ class Lexer:
             ('INTEGER',           r'\d+'),
             ('STRING',            r'"(.*?)"'),
             ('BOOLEAN',           r'\b(?:true|false)\b'),
+            ('BITWISE_SHIFT',     r'<<|>>'),             # Bitwise left/right shift
             ('RELATIONAL',        r'==|!=|>=|<=|[><]'), # must check multi-char first. If not will match "==" as 2 consecutive "=" instead
-            ('LOGICAL',           r'&&|\|\||[!^]'),
-            ('ARITHMETIC',        r'[+\-*/]'),
+            ('LOGICAL_AND',       r'&&'),                # Logical AND 
+            ('LOGICAL_OR',        r'\|\|'),              # Logical OR 
+            ('LOGICAL_NOT',       r'!'),                 # Logical NOT 
+            ('BITWISE_OR',        r'\|'),                # Bitwise OR 
+            ('BITWISE_AND',       r'&'),                 # Bitwise AND 
+            ('BITWISE_XOR',       r'\^'),                # Bitwise XOR
+            ('ARITHMETIC',        r'[+\-*/%]'),
             ('ASSIGN',            r'='),
             ('DELIMITER',         r'[;,\(\)\{\}\[\]\.]'),
             ('IDEN',              r'[A-Za-z_][A-Za-z0-9_]*'),

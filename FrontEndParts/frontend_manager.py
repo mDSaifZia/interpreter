@@ -2,6 +2,7 @@ import argparse
 from custom_semantic_checker import SemanticChecker
 from custom_lexer import Lexer
 from custom_parser import Parser
+from custom_bytecode_generator import BytecodeGenerator
 
 #To run this file from proj dir: python FrontEndParts/frontend_manager.py -i sample_source_codes/sourceCode.rtsk -o byteCode.bytecode
 
@@ -36,6 +37,11 @@ def main():
         print("Semantic Analysis: PASS")
     except Exception as e:
         print(f"Semantic Analysis: FAIL ({e})")
+
+    # ----------------- Added Bytecode Generation -----------------
+    generator = BytecodeGenerator()
+    generator.write_bytecode_files(ast)
+
 
 if __name__ == '__main__':
     main()

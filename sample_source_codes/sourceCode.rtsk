@@ -1,13 +1,69 @@
 /// This is a multi-line comment
  End of multi-line comment ///
 
+// Test builtin print function
+var string = "Hello World";
+print(string);
+print("Hello");
+print(100);
+
+// Test var declare w string
 var a = "hello";
+
+// Test var declare w boolean
 var test = false;
-var x = (3 * 2) == 5 * 9;
+
+// Test addition
+var x = 3+2 + 1;
+
+// Test subtraction
+x = 43-2- 10;
+
+// Test div
+x = 9 / 3;
+
+// Test multi
+x = 8 * 5;
+
+// Test modulo
+x = 8 %2;
+
+// Test combine arithmetic
+x = 6 * 5 + 4 - 9 /2;
+x = 2 + 3 - 5;
+x = 2 - 4 / 8;
+
+// Test relational
+var p = 6;
+var y = 5 == 6;
+y = 3 >4;
+y = 5<1;
+y = 9 <=p;
+y = p >= 6;
+y = 9 != "hello";
+
+// Test bitwise shift
+var bit = 8;
+bit = bit >> 1;
+bit = 32 << 3;
+
+// Test logical and, or, not
+var log = true && false;
+log = true || false;
+log = !true;
+
+// Test bitwise or, and, xor
+var bit2 = 4 ^ 7;
+bit2 = 1 &2;
+bit2 = 9 | 8;
+
+// Test reassignment
 x = 5.7;
-var y = 0;
-var z = x + y;
+var z = x + x;
 var b = a;
 b = z;
-n = !a; 
-var r = 9 + -1 * (-7);
+
+// Test associativity
+var aso = a = b = z = 78;
+aso = b = 89;
+aso = b;

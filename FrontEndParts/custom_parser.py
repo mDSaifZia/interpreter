@@ -69,6 +69,8 @@ class Parser:
                     return self.parse_while_stmt()
                 case "return":
                     return self.parse_return_stmt()
+                case "print":
+                    return self.parse_print_stmt()
         # Check for assignment statement: identifier followed by ASSIGN.
         if token.type == "IDEN":
             next_token = self.peek()
@@ -79,6 +81,14 @@ class Parser:
             return self.parse_block()
         # Fallback: treat it as an expression statement.
         return self.parse_expression_stmt()
+    
+    def parse_print_stmt(self):     # Parse a print statement
+        self.consume("KEYWORD", "print")
+        self.consume("DELIMITER", "(")
+        expr = self.parse_expression()
+        self.consume("DELIMITER", ")")
+        self.consume("DELIMITER", ";")
+        return PrintStmt(expr)
 
     def parse_block(self):          # Parse a block of statements enclosed in curly braces {}, for functions or loops or if-else statements
         self.consume("DELIMITER", "{")
@@ -149,20 +159,20 @@ class Parser:
 
     def parse_logical_or(self):
         node = self.parse_logical_and()
-        while self.current_token() and self.current_token().type == "LOGICAL" and self.current_token().value == "||":
-            op = self.consume("LOGICAL").value
+        while self.current_token() and self.current_token().type == "LOGICAL_OR" and self.current_token().value == "||":
+            op = self.consume("LOGICAL_OR").value
             right = self.parse_logical_and()
             node = BinaryOp(node, op, right)
         return node
 
     def parse_logical_and(self):
         node = self.parse_equality()
-        while self.current_token() and self.current_token().type == "LOGICAL" and self.current_token().value == "&&":
-            op = self.consume("LOGICAL").value
+        while self.current_token() and self.current_token().type == "LOGICAL_AND" and self.current_token().value == "&&":
+            op = self.consume("LOGICAL_AND").value
             right = self.parse_equality()
             node = BinaryOp(node, op, right)
         return node
-
+    
     def parse_equality(self):
         node = self.parse_relational()
         while self.current_token() and self.current_token().type == "RELATIONAL" and self.current_token().value in ("==", "!="):
@@ -170,26 +180,88 @@ class Parser:
             right = self.parse_relational()
             node = BinaryOp(node, op, right)
         return node
-
+    
     def parse_relational(self):
-        node = self.parse_additive()
+        node = self.parse_assignment()
         while self.current_token() and self.current_token().type == "RELATIONAL" and self.current_token().value in (">", "<", ">=", "<="):
             op = self.consume("RELATIONAL").value
+            right = self.parse_assignment()
+            node = BinaryOp(node, op, right)
+        return node
+    
+    def parse_assignment(self):
+        node = self.parse_bitwise_or()
+        if self.current_token() and self.current_token().type == "ASSIGN":
+            self.consume("ASSIGN")
+            # Right-associative: parse the right-hand side as an assignment.
+            right = self.parse_assignment()
+            node = Assignment(node, right)
+        return node
+
+    def parse_bitwise_or(self):
+        node = self.parse_bitwise_xor()
+        while self.current_token() and self.current_token().type == "BITWISE_OR" and self.current_token().value == "|":
+            op = self.consume("BITWISE_OR").value
+            right = self.parse_bitwise_xor()
+            node = BinaryOp(node, op, right)
+        return node
+
+    def parse_bitwise_xor(self):
+        node = self.parse_bitwise_and()
+        while self.current_token() and self.current_token().type == "BITWISE_XOR" and self.current_token().value == "^":
+            op = self.consume("BITWISE_XOR").value
+            right = self.parse_bitwise_and()
+            node = BinaryOp(node, op, right)
+        return node
+
+    def parse_bitwise_and(self):
+        node = self.parse_shift()
+        while self.current_token() and self.current_token().type == "BITWISE_AND" and self.current_token().value == "&":
+            op = self.consume("BITWISE_AND").value
+            right = self.parse_shift()
+            node = BinaryOp(node, op, right)
+        return node
+    
+    def parse_shift(self):
+        node = self.parse_additive()
+        while self.current_token() and self.current_token().type == "BITWISE_SHIFT":
+            op = self.consume("BITWISE_SHIFT").value
             right = self.parse_additive()
             node = BinaryOp(node, op, right)
         return node
 
     def parse_additive(self):
-        node = self.parse_term()
-        while self.current_token() and self.current_token().type == "ARITHMETIC" and self.current_token().value in ("+", "-"):
-            op = self.consume("ARITHMETIC").value
-            right = self.parse_term()
-            node = BinaryOp(node, op, right)
-        return node
+        left = self.parse_term()
+        # If the next token is '+' or '-' then decide how to group.
+        if self.current_token() and self.current_token().type == "ARITHMETIC" and self.current_token().value in ("+", "-"):
+            # If it's exclusively '+' operators, use right recursion.
+            if self.current_token().value == "+":
+                pos_backup = self.pos
+                pure_plus = True
+                # Look through the whole expression, consume all successive '+' and terms.
+                while self.current_token() and self.current_token().type == "ARITHMETIC":
+                    if self.current_token().value != "+":
+                        pure_plus = False
+                        break
+                    self.consume("ARITHMETIC")
+                    self.parse_term()
+                self.pos = pos_backup  # restore position
+                if pure_plus:
+                    op = self.consume("ARITHMETIC").value  # must be '+'
+                    right = self.parse_additive()
+                    return BinaryOp(left, op, right)
+            # Otherwise, use left-associative grouping.
+            node = left
+            while self.current_token() and self.current_token().type == "ARITHMETIC" and self.current_token().value in ("+", "-"):
+                op = self.consume("ARITHMETIC").value
+                right = self.parse_term()
+                node = BinaryOp(node, op, right)
+            return node
+        return left
 
     def parse_term(self):
         node = self.parse_factor()
-        while self.current_token() and self.current_token().type == "ARITHMETIC" and self.current_token().value in ("*", "/"):
+        while self.current_token() and self.current_token().type == "ARITHMETIC" and self.current_token().value in ("*", "/", "%"):
             op = self.consume("ARITHMETIC").value
             right = self.parse_factor()
             node = BinaryOp(node, op, right)
@@ -209,7 +281,7 @@ class Parser:
         elif token.type == "BOOLEAN":
             self.consume("BOOLEAN")
             value = True if token.value == "true" else False
-            return Literal(value)
+            return BooleanLiteral(value)
         elif token.type == "IDEN":      # Check for a function call
             self.consume("IDEN")
             if self.current_token() and self.current_token().type == "DELIMITER" and self.current_token().value == "(":
@@ -228,14 +300,14 @@ class Parser:
             node = self.parse_expression()
             self.consume("DELIMITER", ")")
             return node
-        elif token.type == "LOGICAL" and token.value == "!":    # Check for unary operators e.g !a, -b 
-            op = self.consume("LOGICAL", "!")
+        elif token.type == "LOGICAL_NOT" and token.value == "!":    # Check for unary operators e.g !a, -b 
+            op = self.consume("LOGICAL_NOT").value
             operand = self.parse_factor()
-            return UnaryOp(op.value, operand)
+            return UnaryOp(op, operand)
         elif token.type == "ARITHMETIC" and token.value == "-": # Check for unary operators e.g -b (for handling negative numbers)
-            op = self.consume("ARITHMETIC", "-")
+            op = self.consume("ARITHMETIC", "-").value
             operand = self.parse_factor()
-            return UnaryOp(op.value, operand)
+            return UnaryOp(op, operand)
         else:
             raise Exception(f"Unexpected token {token}")
         
