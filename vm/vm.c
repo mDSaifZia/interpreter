@@ -37,13 +37,13 @@ VM *initVM() {
       sizeof(vm->constants)); // Zero out constant table (as it is a array of
                               // ptrs, this means it is initialise to NULL ptrs)
   // preload constants
-  vm->constants[vm->constantCount++] = (PrimitiveObject *)get_null(); // index 0
+  vm->constants[vm->constantCount++] = (PrimitiveObject *)get_null(vm); // index 0
   vm->constants[vm->constantCount++] =
-      (PrimitiveObject *)new_bool(0); // index 1 (false)
+      (PrimitiveObject *)new_bool(vm, 0); // index 1 (false)
   vm->constants[vm->constantCount++] =
-      (PrimitiveObject *)new_bool(1); // index 2 (true)
+      (PrimitiveObject *)new_bool(vm, 1); // index 2 (true)
   for (int i = -510; i <= 510; i++) {
-    vm->constants[vm->constantCount++] = (PrimitiveObject *)new_int(i);
+    vm->constants[vm->constantCount++] = (PrimitiveObject *)new_int(vm, i);
   }
 
   // initialise bytecode instruction pointer
@@ -59,8 +59,8 @@ VM *initVM() {
 // OP_DIV,        // Divide                                    done
 // OP_GET_GLOBAL, // Get a global variable                     done
 // OP_SET_GLOBAL, // Set a global variable                     done
-// OP_CALL,       // Call function
-// OP_RETURN,     // Return from function
+// OP_CALL,       // Call function                             done
+// OP_RETURN,     // Return from function                      done
 // OP_HALT,       // Stop execution                            done
 // OP_JMP,        // JMP to an offset from current idx         done
 // OP_JMPIF,      // false ? JMP to and offset from curr idx   done
@@ -74,23 +74,22 @@ VM *initVM() {
 // ID,            // ID representation                         done
 
 // // OPCODE flags (SYNTAX: FLAG (NO ARG))
-// OP_FUNCDEF,    // Flag for start of function definition
-// OP_ENDFUNC,    // Flag for end of function definition
-// OP_CLASSDEF,   // Flag for start of class definition
-// OP_ENDCLASS,  // Flag for end of class definition
+// OP_FUNCDEF,    // Flag for start of function definition     done
+// OP_ENDFUNC,    // Flag for end of function definition       done
+// OP_CLASSDEF,   // Flag for start of class definition        -
+// OP_ENDCLASS,  // Flag for end of class definition           -
 
 // // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
-// OP_BLSHIFT,  // Flag for end of class definition
-// OP_BRSHIFT,  // Flag for end of class definition
-// OP_BXOR,     // Flag for end of class definition
-// OP_BOR,      // Flag for end of class definition
-// OP_BAND,     // Flag for end of class definition
+// OP_BLSHIFT,  // Binary Left bitshift 
+// OP_BRSHIFT,  // Binary Right bitshift
+// OP_BXOR,     // Binary XOR
+// OP_BOR,      // Binary OR
+// OP_BAND,     // Binary AND
 
 // // OPCODE local variables (SYNTAX: OP (NO ARG))
-// OP_GET_LOCAL,  // Get local variable
-// OP_SET_LOCAL,  // Set local variable
-// OP_DEFINE_LOCAL, // Define new local variable
-// OP_ENTER_SCOPE, // Enter a new scope
+// OP_GET_LOCAL,  // Get local variable                        done
+// OP_SET_LOCAL,  // Set local variable                        done
+// LOCAL,         // LOCAL ID                                  done
 
 // // OPCODES standard functions
 // OP_PRINT,       // prints to stdout
@@ -303,16 +302,16 @@ void run(VM *vm, const char *bytecode_file) {
 
     case INT: { // [1 byte opcode][8 byte int64]
       int64_t value;
-      PrimitiveObject *int_to_push;
+    //   PrimitiveObject *int_to_push;
 
       memcpy(&value, vm->bytecode_ip,
              sizeof(int64_t)); // Copy raw bytes into value
       vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +
                                      sizeof(int64_t)); // Move past 8 bytes
-      int_to_push = get_constant(vm, INT, value);
-      if (!int_to_push)
-        int_to_push = (PrimitiveObject *)new_int(value);
-      push(vm, int_to_push, PRIMITIVE_OBJ);
+    //   int_to_push = get_constant(vm, INT, value);
+    //   if (!int_to_push)
+    //     int_to_push = (PrimitiveObject *)new_int(vm, value);
+      push(vm, new_int(vm, value), PRIMITIVE_OBJ);
       break;
     }
 
@@ -394,11 +393,7 @@ void run(VM *vm, const char *bytecode_file) {
                            b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
       } else {
-        printf("Error: Invalid types for ADD operation.\n"); // just disallowing
-                                                             // other types of
-                                                             // additions first
-                                                             // but it can be
-                                                             // implemented
+        printf("Error: Invalid types for ADD operation.\n"); // just disallowing other types of additions first but it can be implemented
       }
       break;
     }
@@ -420,7 +415,7 @@ void run(VM *vm, const char *bytecode_file) {
           if (b_obj->type == TYPE_int) {
             // Create a negated copy of the int
             int64_t negated_value = -(((int_Object *)b_obj)->value);
-            negated_b = (PrimitiveObject *)new_int(negated_value);
+            negated_b = (PrimitiveObject *)new_int(vm, negated_value);
           } else { // TYPE_float
             // Create a negated copy of the float
             double negated_value = -(((float_Object *)b_obj)->value);
@@ -485,20 +480,70 @@ void run(VM *vm, const char *bytecode_file) {
       break;
     }
 
-      /*
-EXAMPLE:
-y = 4
-x = y
-should translate to:
-INT 4 -> (pushed onto stack) -> stack_bottom [4] stack_top
-ID y -> (pushed onto stack) -> stack_bottom [4, y] stack_top
-OP_SET_GLOBAL -> (pops y, pops 4, sets y to 4 in GT) -> stack_bottom []
-stack_top ID y -> (pushed onto stack) -> stack_bottom [y] stack_top
-OP_GET_GLOBAL -> (pops y, gets y from GT and pushed onto stack) -> stack_bottom
-[4] stack_top ID x (pushed onto stack) -> stack_bottom [4, x] stack_top
-OP_SET_GLOBAL -> (pops x, pops 4, sets x to 4 in GT) -> stack_bottom []
-stack_top
-*/
+    /* Handle all operations at once */
+    case OP_EQ:
+    case OP_NEQ:
+    case OP_GT:
+    case OP_GEQ:
+    case OP_LT:
+    case OP_LEQ: {
+        StackEntry b = pop(vm);
+        StackEntry a = pop(vm);
+        
+        if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
+            PrimitiveObject *a_obj = (PrimitiveObject *)a.value;
+            PrimitiveObject *b_obj = (PrimitiveObject *)b.value;
+            int result = 0;
+            
+            switch (instruction) {
+                case OP_EQ:  
+                    // printf("comparing eq\n");
+                    result = a_obj->eq(a_obj, b_obj);  
+                    break;
+                case OP_NEQ: 
+                    // printf("comparing neq\n");
+                    result = a_obj->neq(a_obj, b_obj); 
+                    break;
+                case OP_GT:  
+                    // printf("comparing gt\n");
+                    result = a_obj->gt(a_obj, b_obj);  
+                    break;
+                case OP_GEQ: 
+                    // printf("comparing geq\n");
+                    result = a_obj->geq(a_obj, b_obj); 
+                    break;
+                case OP_LT: 
+                    // printf("comparing lt\n");
+                    result = a_obj->lt(a_obj, b_obj);  
+                    break;
+                case OP_LEQ:
+                    // printf("comparing leq\n");
+                    result = a_obj->leq(a_obj, b_obj); 
+                    break;
+            }
+            // printf("result: %d \n", result);
+            push(vm, get_constant(vm, BOOL, result), PRIMITIVE_OBJ);
+        // We can add inother else ifs for advanced primitive object types
+        } else {
+            printf("Error: Comparison not implemented for non PRIMITIVE_OBJ types.\n");
+        }
+        break;
+    }
+
+    /*
+    EXAMPLE:
+    y = 4
+    x = y
+    should translate to:
+    INT 4 -> (pushed onto stack) -> stack_bottom [4] stack_top
+    ID y -> (pushed onto stack) -> stack_bottom [4, y] stack_top
+    OP_SET_GLOBAL -> (pops y, pops 4, sets y to 4 in GT) -> stack_bottom []
+    stack_top ID y -> (pushed onto stack) -> stack_bottom [y] stack_top
+    OP_GET_GLOBAL -> (pops y, gets y from GT and pushed onto stack) -> stack_bottom
+    [4] stack_top ID x (pushed onto stack) -> stack_bottom [4, x] stack_top
+    OP_SET_GLOBAL -> (pops x, pops 4, sets x to 4 in GT) -> stack_bottom []
+    stack_top
+    */
     case OP_GET_GLOBAL: {
       StackEntry id = pop(vm);
 

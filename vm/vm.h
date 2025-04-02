@@ -14,6 +14,9 @@
 #define MAX_FUNCTIONS 1024
 #define MAX_OBJECTS 1024
 
+/* Forward declaration */
+typedef struct PrimitiveObject PrimitiveObject;
+
 /* Bytecode Instructions */
 typedef enum {
     // OPCODE instructions (SYNTAX: OP (NO ARG))
@@ -136,7 +139,7 @@ typedef struct {
 
 
 /* VM Structure */
-typedef struct {
+typedef struct VM {
     Stack stack;  // stack to store entries
 
     ObjectEntry objects[MAX_OBJECTS]; // Object table (subject to change as we just implemented hashmaps)
@@ -172,6 +175,7 @@ value: represents the value to find
 get_constant(BOOL, 1) -> returns boolObject * True
 get_constant(BOOL, 0) -> returns boolObject * False
 get_constant(__NULL__, 1) -> returns NULLobject *
+we might deprecate this
 */
 PrimitiveObject * get_constant(VM *vm, OpCode opcode, int64_t value);
 

@@ -1,0 +1,1 @@
+gcc test_primitives.c ../vm/vm.c ../vm/stackframe.c  ..\hashmap\hashmap.c core_primitives.c -I. -I..\hashmap -I..\vm -o test.exe
