@@ -1,0 +1,4 @@
+test_vm.c
+*.exe
+test_vm
+test.bin

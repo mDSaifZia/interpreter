@@ -4,62 +4,74 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "CorePrimitives/core_primitives.h"
-#include "AdvancedPrimitives/advanced_primitives.h"
-#include "hashmap/hashmap.h"
+#include "../CorePrimitives/core_primitives.h"
+#include "../AdvancedPrimitives/advanced_primitives.h"
+#include "../hashmap/hashmap.h"
 
-#define STACK_MAX 1024              
+#define STACK_MAX 4096
 #define MAX_CONSTANTS 1024
 #define MAX_GLOBALS 1024
-#define MAX_FUNCTIONS 256
-#define MAX_OBJECTS 256
+#define MAX_FUNCTIONS 1024
+#define MAX_OBJECTS 1024
+
+/* Forward declaration */
+typedef struct PrimitiveObject PrimitiveObject;
 
 /* Bytecode Instructions */
 typedef enum {
     // OPCODE instructions (SYNTAX: OP (NO ARG))
-    OP_ADD,        // Add two values                            Binary: 0b 0000 0000
-    OP_SUB,        // Sub two values (consistency of sub op)    Binary: 0b 0000 0001
-    OP_MUL,        // Multiply                                  Binary: 0b 0000 0010
-    OP_DIV,        // Divide                                    Binary: 0b 0000 0011
-    OP_GET_GLOBAL, // Get a global variable                     Binary: 0b 0000 0100              
-    OP_SET_GLOBAL, // Set a global variable                     Binary: 0b 0000 0101
-    OP_CALL,       // Call function                             Binary: 0b 0000 0110
-    OP_RETURN,     // Return from function                      Binary: 0b 0000 0111
-    OP_HALT,       // Stop execution                            Binary: 0b 0000 1000
-    OP_JMP,        // JMP to an offset from current idx         Binary: 0b 0000 1001
-    OP_JMPIF,      // false ? JMP to and offset from curr idx   Binary: 0b 0000 1010
+    OP_ADD,        // Add two values
+    OP_SUB,        // Sub two values (consistency of sub op)
+    OP_MUL,        // Multiply
+    OP_DIV,        // Divide
+    OP_GET_GLOBAL, // Get a global variable
+    OP_SET_GLOBAL, // Set a global variable
+    OP_CALL,       // Call function
+    OP_RETURN,     // Return from function
+    OP_HALT,       // Stop execution
+    OP_JMP,        // JMP to an offset from current idx
+    OP_JMPIF,      // false ? JMP to and offset from curr idx
 
     // OPCODE primitives (SYNTAX: TYPE (ARG))
-    INT,           // prim obj int representation               Binary: 0b 0000 1011
-    FLOAT,         // prim obj float representation             Binary: 0b 0000 1100
-    BOOL,          // prim obj bool representation              Binary: 0b 0000 1101
-    STR,           // prim obj str representation               Binary: 0b 0000 1110
-    _NULL_,        // prim _NULL_ representation                Binary: 0b 0000 1111
-    ID,            // ID representation                         Binary: 0b 0001 0000
+    INT,           // prim obj int representation
+    FLOAT,         // prim obj float representation
+    BOOL,          // prim obj bool representation
+    STR,           // prim obj str representation
+    _NULL_,        // prim _NULL_ representation
+    ID,            // ID representation [1 byte opcode][2 byte ID length][ ID length number of bytes]
 
     // OPCODE flags (SYNTAX: FLAG (NO ARG))
-    OP_FUNCDEF,    // Flag for start of function definition     Binary: 0b 0001 0001
-    OP_ENDFUNC,    // Flag for end of function definition       Binary: 0b 0001 0010
-    OP_CLASSDEF,   // Flag for start of class definition        Binary: 0b 0001 0011
-    OP_ENDCLASS,  // Flag for end of class definition           Binary: 0b 0001 0100
+    OP_FUNCDEF,    // Flag for start of function definition [1 byte]
+    OP_ENDFUNC,    // Flag for end of function definition [1 byte]
+    OP_CLASSDEF,   // Flag for start of class definition
+    OP_ENDCLASS,  // Flag for end of class definition
 
     // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
-    OP_BLSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0101
-    OP_BRSHIFT,  // Flag for end of class definition            Binary: 0b 0001 0110
-    OP_BXOR,     // Flag for end of class definition            Binary: 0b 0001 0111
-    OP_BOR,      // Flag for end of class definition            Binary: 0b 0001 1000
-    OP_BAND,     // Flag for end of class definition            Binary: 0b 0001 1001
+    OP_BLSHIFT,  // Bitwise left shift
+    OP_BRSHIFT,  // Bitwise right shift
+    OP_BXOR,     // Bitwise XOR
+    OP_BOR,      // Bitwise OR
+    OP_BAND,     // Bitwise AND
+
+    // OPCODE local variables (SYNTAX: OP (NO ARG)) (I may remove these)
+    OP_GET_LOCAL,  // Get local variable [1 byte]
+    OP_SET_LOCAL,  // Set local variable [1 byte]
+    LOCAL,        // Analogous to ID for local variables arguments [1 byte][2 bytes]
+
+    // OPCODES standard functions
+    OP_PRINT,       // prints to stdout
+    OP_INPUT,       // gets values from stdin
+
+    OP_MOD, // [1 byte]
+    OP_NEQ, // [1 byte]
+    OP_EQ, // [1 byte]
+    OP_GEQ, // [1 byte]
+    OP_GT, // [1 byte]
+    OP_LEQ,// [1 byte]
+    OP_LT // [1 byte]
 
 } OpCode;
 
-/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
-
-typedef struct GlobalEntry{
-    void * value;
-    StackEntryType entry_type;
-} GlobalEntry;
-
-/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
 
 /* /////////////////////////////// STACK TABLE /////////////////////////////// */
 
@@ -67,7 +79,7 @@ typedef enum {
     PRIMITIVE_OBJ,
     ADVANCED_OBJ,
     FUNCTION_FRAME,
-    IDENTIFIER
+    IDENTIFIER,
 } StackEntryType;
 
 typedef struct StackEntry{
@@ -83,12 +95,22 @@ typedef struct Stack{
 
 /* /////////////////////////////// STACK TABLE /////////////////////////////// */
 
+/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
+/* This is essentially the same StackEntry but made different so we can mutate it if needed */
+typedef struct GlobalEntry{
+  void * value;
+  StackEntryType entry_type;
+} GlobalEntry;
+
+/* /////////////////////////////// GLOBAL TABLE /////////////////////////////// */
+
 /* /////////////////////////////// FUNCTION TABLE /////////////////////////////// */
 
 typedef struct {
     char *name;       // Function name
-    size_t bytecode_offset; // Start of function in bytecode
-    int paramCount;   // Number of parameters
+    size_t func_body_address; // Location of first instruction in body
+    int num_args;      //Need to know number of arguments to pop out during OP_CALL
+    int local_count;    //Number of local variables (including arguments)
 } FunctionEntry;
 
 /* /////////////////////////////// FUNCTION TABLE /////////////////////////////// */
@@ -102,17 +124,30 @@ typedef struct {
 
 /* /////////////////////////////// OBJECT TABLE /////////////////////////////// */
 
-/* VM Structure */
+/* /////////////////////////////// HEADER /////////////////////////////// */
+
 typedef struct {
+  size_t func_section_start; // Start location of function section
+  size_t func_section_end;   // End location of function section
+  size_t class_section_start; // Start location of class section
+  size_t class_section_end;   // End location of class section
+  size_t execution_section_start;   // Start location of bytecode that is executed
+  uint8_t padding[24];         // 24 bytes of padding
+} BytecodeHeader;
+
+/* /////////////////////////////// HEADER /////////////////////////////// */
+
+
+/* VM Structure */
+typedef struct VM {
     Stack stack;  // stack to store entries
-    
-    FunctionEntry functions[MAX_FUNCTIONS]; // Function table (subject to change as we just implemented hashmaps)
-    int functionCount;
-    
+
     ObjectEntry objects[MAX_OBJECTS]; // Object table (subject to change as we just implemented hashmaps)
     int objectCount;
 
     Hashmap * globals;  // Global variable storage
+
+    Hashmap * functions;  // Function storage
 
     // implement an instance table for garbage collection
 
@@ -128,8 +163,21 @@ void run(VM* vm, const char* bytecode_file);
 void freeVM(VM* vm);
 
 /* stack functions */
-void push(VM* vm, void* value, StackEntryType type); 
+void push(VM* vm, void* value, StackEntryType type);
 StackEntry pop(VM* vm);
+
+/* constant table functions */
+
+/*
+Opcode: Only accepts BOOL, _NULL_ and INT
+value: represents the value to find
+
+get_constant(BOOL, 1) -> returns boolObject * True
+get_constant(BOOL, 0) -> returns boolObject * False
+get_constant(__NULL__, 1) -> returns NULLobject *
+we might deprecate this
+*/
+PrimitiveObject * get_constant(VM *vm, OpCode opcode, int64_t value);
 
 
 #endif

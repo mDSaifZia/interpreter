@@ -20,8 +20,8 @@ typedef struct Hashmap {
 
 /* Function Declarations */
 Hashmap* init_hashmap(size_t capacity);
-void    hashmap_resize(Hashmap *hashmap);
-void    hashmap_set(Hashmap *hashmap, const char *key, void *value);
+void    hashmap_resize(Hashmap *hashmap, void (*free_value)(void*));
+void    hashmap_set(Hashmap *hashmap, const char *key, void *value, void (*free_value)(void*));
 void*   hashmap_get(Hashmap *hashmap, const char *key);
 void    hashmap_delete(Hashmap *hashmap, const char *key, void (*free_value)(void*));
 void    free_hashmap(Hashmap *hashmap, void (*free_value)(void*));
