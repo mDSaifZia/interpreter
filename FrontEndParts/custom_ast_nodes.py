@@ -66,10 +66,11 @@ class UnaryOp(ASTNode):     # Unary operation e.g. -a(cannot handle this yet) or
         return f"UnaryOp({self.op}, {self.operand})"
 
 class Literal(ASTNode):     # Literal value e.g. 5, "hello", 3.14
-    def __init__(self, value):
+    def __init__(self, value, type):
         self.value = value
+        self.type = type
     def __repr__(self):
-        return f"Literal({self.value})"
+        return f"Literal({self.value}, {self.type})"
 
 class Identifier(ASTNode):  # Identifier e.g. variable name
     def __init__(self, name):
@@ -105,12 +106,6 @@ class ReturnStmt(ASTNode):
         self.expr = expr
     def __repr__(self):
         return f"ReturnStmt({self.expr})"
-    
-class BooleanLiteral(ASTNode):
-    def __init__(self, value):
-        self.value = value
-    def __repr__(self):
-        return f"BooleanLiteral({self.value})"
     
 class PrintStmt(ASTNode):
     def __init__(self, expr):

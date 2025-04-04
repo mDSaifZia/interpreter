@@ -1,0 +1,5 @@
+// Test complex arithmetic
+var x = (((( 3 +5) +1)*2)-1);
+
+var y = (3+2)+(1+(5+2));
+

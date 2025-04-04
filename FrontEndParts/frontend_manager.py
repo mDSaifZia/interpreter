@@ -4,13 +4,14 @@ from custom_lexer import Lexer
 from custom_parser import Parser
 from custom_bytecode_generator import BytecodeGenerator
 
-#To run this file from proj dir: python FrontEndParts/frontend_manager.py -i sample_source_codes/sourceCode.rtsk -o byteCode.bytecode
+#To run this file from proj dir: 
+# python FrontEndParts/frontend_manager.py -i testing/inputSourceCodeFiles/sourceCode.rtsk
 
 # ================================================ Main ================================================
 def main():
     parser_arg = argparse.ArgumentParser(description="Custom Language Compiler")
     parser_arg.add_argument("-i", "--input", required=True, help="Input source code file (.rtsk)")
-    parser_arg.add_argument("-o", "--output", required=True, help="Output bytecode file")
+    # parser_arg.add_argument("-o", "--output", required=True, help="Output bytecode file")
     args = parser_arg.parse_args()
 
     # Read the source code from the input file.
@@ -38,9 +39,12 @@ def main():
     except Exception as e:
         print(f"Semantic Analysis: FAIL ({e})")
 
-    # ----------------- Added Bytecode Generation -----------------
+    # ==================== Added Bytecode Generation ====================
+    # get file name from the output argument
+    inputfileName = args.input.split('/')[-1].split('.')[0]  # get the file name without extension
+    output_file = f"testing/outputByteCodeFiles/main{inputfileName[-1]}.bytecode"
     generator = BytecodeGenerator()
-    generator.write_bytecode_files(ast)
+    generator.write_bytecode_files(ast, output_file)
 
 
 if __name__ == '__main__':

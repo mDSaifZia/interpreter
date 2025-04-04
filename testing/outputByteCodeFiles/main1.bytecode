@@ -1,22 +1,22 @@
-STR 13 "Hello World"
+STR 11 Hello World
 ID 6 string
 OP_SET_GLOBAL
 ID 6 string
 OP_GET_GLOBAL
 OP_PRINT
-STR 7 "Hello"
+STR 5 Hello
 OP_PRINT
 INT 100
 OP_PRINT
-STR 7 "hello"
+STR 5 hello
 ID 1 a
 OP_SET_GLOBAL
-BOOL false
+BOOL False
 ID 4 test
 OP_SET_GLOBAL
 INT 3
 INT 2
-INT 1
+FLOAT 1.1
 OP_ADD
 OP_ADD
 ID 1 x
@@ -99,7 +99,7 @@ OP_GEQ
 ID 1 y
 OP_SET_GLOBAL
 INT 9
-STR 7 "hello"
+STR 5 hello
 OP_NEQ
 ID 1 y
 OP_SET_GLOBAL
@@ -117,18 +117,18 @@ INT 3
 OP_BLSHIFT
 ID 3 bit
 OP_SET_GLOBAL
-BOOL true
-BOOL false
+BOOL True
+BOOL False
 OP_LOGICAL_AND
 ID 3 log
 OP_SET_GLOBAL
-BOOL true
-BOOL false
+BOOL True
+BOOL False
 OP_LOGICAL_OR
 ID 3 log
 OP_SET_GLOBAL
-BOOL true
-BOOL false
+BOOL True
+BOOL False
 OP_EQ
 ID 3 log
 OP_SET_GLOBAL

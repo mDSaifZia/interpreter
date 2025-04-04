@@ -269,19 +269,19 @@ class Parser:
 
     def parse_factor(self):         # Parse a factor, which can be a literal, identifier, function call, or a parenthesized expression (Most basic unit of an expression)
         token = self.current_token()
-        if token.type in ("INTEGER", "FLOAT", "STRING"):
-            self.consume(token.type)
+        if token.type in ("INTEGER", "FLOAT", "STRING", "BOOLEAN"):    # Check for literals e.g. 5, 3.14, "hello", true/false
+            self.consume(token.type)                                    # convert values to python objects for easier handling
             if token.type == "INTEGER":
                 value = int(token.value)
             elif token.type == "FLOAT":
                 value = float(token.value)
+            elif token.type == "BOOLEAN":
+                value = True if token.value == "true" else False
+            elif token.type == "STRING":
+                value = str(token.value[1:-1])  # Remove the surrounding quotes from the string literal
             else:
-                value = token.value
-            return Literal(value)
-        elif token.type == "BOOLEAN":
-            self.consume("BOOLEAN")
-            value = True if token.value == "true" else False
-            return BooleanLiteral(value)
+                raise Exception(f"Unexpected token {token}")
+            return Literal(value, type(value).__name__)
         elif token.type == "IDEN":      # Check for a function call
             self.consume("IDEN")
             if self.current_token() and self.current_token().type == "DELIMITER" and self.current_token().value == "(":

@@ -221,17 +221,19 @@ class BytecodeGenerator:
 
 
     def visit_Literal(self, node):
-        if isinstance(node.value, int):
-            self.bytecodes.append(f"INT {node.value}")
-        elif isinstance(node.value, float):
-            self.bytecodes.append(f"FLOAT {node.value}")
-        elif isinstance(node.value, str):
-            self.bytecodes.append(f"STR {len(node.value)} {node.value}")
-        else:
-            self.bytecodes.append("__NULL__")
-
-    def visit_BooleanLiteral(self, node):
-        self.bytecodes.append(f"BOOL {str(node.value).lower()}")
+        match node.type:
+            case "int":
+                self.bytecodes.append(f"INT {node.value}")
+            case "float":
+                self.bytecodes.append(f"FLOAT {node.value}")
+            case "str":
+                self.bytecodes.append(f"STR {len(node.value)} {node.value}")
+            case "bool":
+                self.bytecodes.append(f"BOOL {str(node.value)}")
+            case "null":
+                self.bytecodes.append("__NULL__")
+            case _:
+                raise Exception(f"Unknown literal type {node.type}")
 
     def visit_Identifier(self, node):
         if self.in_function and self.locals and node.name in self.locals:       # Check scope
@@ -277,7 +279,7 @@ class BytecodeGenerator:
             self.bytecodes.append("OP_SUB")
         elif node.op == '!':
             self.visit(node.operand)
-            self.bytecodes.append("BOOL false")
+            self.bytecodes.append("BOOL False")
             self.bytecodes.append("OP_EQ")
         else:
             raise Exception(f"Unknown unary operator {node.op}")
