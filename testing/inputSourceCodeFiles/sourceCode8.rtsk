@@ -5,6 +5,15 @@ fn f(a,b) {
     var d = 5;
     a = b +5;
     var c = 2;
+    // d will refer to local d
+    return a + b+ c + d;
+    
+}
+
+fn g(a,b) {
+    a = b +5;
+    var c = 2;
+    // d will refer to global d
     return a + b+ c + d;
     
 }
