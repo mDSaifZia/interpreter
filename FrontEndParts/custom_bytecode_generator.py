@@ -140,6 +140,13 @@ class BytecodeGenerator:
         for block in final_blocks:
             result.extend(block)
         return result
+    
+    def add_local(self, var_name):
+        if self.locals is None:
+            self.locals = {}
+        idx = len(self.locals)
+        self.locals[var_name] = idx
+        return idx
 
     # =============================== Bytecode Generation ===============================
     def generate(self, ast):
@@ -286,6 +293,10 @@ class BytecodeGenerator:
 
     def visit_ExpressionStmt(self, node):
         self.visit(node.expr)
+        if (node.expr.__class__.__name__ == "CallExpr"):
+            # Parent node of CallExpr is ExpressionStmt if its return value is not used.
+            # Hence, if the expression is a function call, we need to add an OP_POP to discard the result at the end to prevent stack overflow.
+            self.bytecodes.append("OP_POP")
 
     def visit_Block(self, node):
         for stmt in node.statements:
@@ -302,5 +313,48 @@ class BytecodeGenerator:
     def visit_PrintStmt(self, node):
         self.visit(node.expr)
         self.bytecodes.append("OP_PRINT")
+
+    def visit_CallExpr(self, node):
+        for arg in node.arguments:
+            self.visit(arg)
+        self.bytecodes.append(f"IDFUNC {len(node.callee.name)} {node.callee.name}")
+        self.bytecodes.append("OP_CALL")
+
+    def visit_FunctionDecl(self, node):
+        original_bytecodes = self.bytecodes
+        self.in_function = True
+        self.locals = {}
+        # Generate local variable dict from function parameters.
+        for i, param in enumerate(node.params):
+            self.locals[param.name] = i
+        self.bytecodes = []
+        # Generate the function definition body bytecodes and place in self.bytecodes.
+        self.visit(node.body)
+        if not self.bytecodes or self.bytecodes[-1] != "OP_RETURN": 
+            # Ensure the function ALWAYS ends with a return statement
+            self.bytecodes.append("__NULL__")
+            self.bytecodes.append("OP_RETURN")
+        
+       # format full function def bytecodes and add to func_bytecodes
+        func_body = self.bytecodes.copy()
+        num_args = len(node.params)
+        num_locals = len(self.locals)
+        funcheader = []
+        funcheader.append("OP_FUNCDEF")
+        funcheader.append(f"IDFUNC {len(node.name.name)} {node.name.name}")
+        funcheader.append(f"NUMARGS {num_args}")
+        funcheader.append(f"NUMVARS {num_locals}")
+        funcheader.extend(func_body)
+        funcheader.append("OP_ENDFUNC")
+        self.func_bytecodes[node.name.name] = funcheader
+        # reset for next function
+        self.in_function = False
+        self.locals = None
+        self.bytecodes = original_bytecodes
+
+    def visit_ReturnStmt(self, node):
+        self.visit(node.expr)
+        self.bytecodes.append("OP_RETURN")
+
 
 
