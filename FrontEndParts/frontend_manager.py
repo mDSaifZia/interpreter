@@ -25,14 +25,11 @@ def readBytecodeFile(filepath):
         print(f"Main execution start: {mainexec_start}")
         
         # Compute main execution code size
-        main_code_size = funcdef_start - 64 - 4
+        main_code_size = funcdef_start - 64
         main_code_bytes = f.read(main_code_size)
         main_code = main_code_bytes.decode("utf-8")
         print("\n===================== Main Exec =====================")
         print(main_code)
-        
-        # Skip the 4 bytes of padding after the main code
-        f.seek(4, 1)
         
         # func defs
         func_defs_bytes = f.read()

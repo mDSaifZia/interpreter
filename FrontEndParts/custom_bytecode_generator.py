@@ -167,11 +167,9 @@ class BytecodeGenerator:
 
     def write_bytecode(self, ast, output_filepath):
         HEADER_SIZE = 64   # 64 bytes for header
-        AFT_MAIN_EXEC_PADDING = 4   # 4 bytes of padding after main execution
         mainexec_start = HEADER_SIZE    # let main execution bytecode start right after the header
         classdef_bytecode_start = 0        # no class def yet so zero
         classdef_bytecode_end = 0
-        aft_mainexec_padding = bytes(AFT_MAIN_EXEC_PADDING)  # 4 bytes of zero padding after main execution bytecode
 
         # Get main execution, func def bytecodes and convert into bytes
         mainexec_bytecode, funcdef_bytecode = self.generate(ast)
@@ -181,7 +179,7 @@ class BytecodeGenerator:
         funcdef_inbytes = funcdef_bytecode_str.encode("utf-8")
         
         # Get offset for function def
-        funcdef_start = HEADER_SIZE + len(mainexec_inbytes) + AFT_MAIN_EXEC_PADDING
+        funcdef_start = HEADER_SIZE + len(mainexec_inbytes)
         funcdef_end = funcdef_start + len(funcdef_inbytes) - 1
 
         # Create bytecode file header (64 bytes)
@@ -197,7 +195,6 @@ class BytecodeGenerator:
         with open(output_filepath, 'wb') as f:
             f.write(header)
             f.write(mainexec_inbytes)
-            f.write(aft_mainexec_padding)
             f.write(funcdef_inbytes)
         print(f"Bytecodes written to: {output_filepath}")
 
