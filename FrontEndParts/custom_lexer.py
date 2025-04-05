@@ -24,12 +24,12 @@ class Lexer:
             ('BOOLEAN',           r'\b(?:true|false)\b'),
             ('BITWISE_SHIFT',     r'<<|>>'),             # Bitwise left/right shift
             ('RELATIONAL',        r'==|!=|>=|<=|[><]'), # must check multi-char first. If not will match "==" as 2 consecutive "=" instead
-            ('LOGICAL_AND',       r'&&'),                # Logical AND 
-            ('LOGICAL_OR',        r'\|\|'),              # Logical OR 
-            ('LOGICAL_NOT',       r'!'),                 # Logical NOT 
-            ('BITWISE_OR',        r'\|'),                # Bitwise OR 
-            ('BITWISE_AND',       r'&'),                 # Bitwise AND 
-            ('BITWISE_XOR',       r'\^'),                # Bitwise XOR
+            ('LOGICAL_AND',       r'&&'),                 
+            ('LOGICAL_OR',        r'\|\|'),               
+            ('LOGICAL_NOT',       r'!'),                  
+            ('BITWISE_OR',        r'\|'),              
+            ('BITWISE_AND',       r'&'),                
+            ('BITWISE_XOR',       r'\^'),                
             ('ARITHMETIC',        r'[+\-*/%]'),
             ('ASSIGN',            r'='),
             ('DELIMITER',         r'[;,\(\)\{\}\[\]\.]'),
@@ -40,10 +40,10 @@ class Lexer:
         ]
 
     def tokenize(self):
-        tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in self.token_specification)    # Create an overarching regex pattern
-        print(tok_regex)
+        # Note order of self.token_specification is impt for regex matching
+        combined_token_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in self.token_specification)    # Create an overarching regex pattern
         tokens = []
-        for obj in re.finditer(tok_regex, self.code, re.DOTALL):
+        for obj in re.finditer(combined_token_regex, self.code, re.DOTALL):
             type = obj.lastgroup
             value = obj.group(type)
             match type:

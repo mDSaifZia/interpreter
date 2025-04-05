@@ -4,7 +4,7 @@ class BytecodeGenerator:
     def __init__(self):
         self.bytecodes = []          # Active instruction list for current scope.
         self.func_bytecodes = {}     # Mapping: function name -> function definition instruction list.
-        self.in_function = False     # Flag indicating if we are generating a function.
+        self.in_function = False     # Flag indicating if we are in a function.
         self.locals = None           # For function scope: maps variable name -> local index.
 
     # =============================== HElper functions ===============================
@@ -111,11 +111,11 @@ class BytecodeGenerator:
                 branch_block = cond_code + [f"OP_JMPIF {self.compute_size(then_code) + 5}"]
             else:
                 branch_block = []
-            # Append the then-code and then an unconditional jump (whose offset will be filled in later).
-            branch_block += then_code + [f"OP_JMP {{jump_offset}}"]
+            # Append the then-code and then an unconditional jump, offset calculated later
+            branch_block += then_code + [f"OP_JMP {{placeholder_offset}}"]
             branch_blocks.append(branch_block)
 
-        # Now compute, for each branch, the total byte size of all branch_blocks that follow.
+        # for each branch, compute the total byte size of all branch_blocks that follow.
         num = len(branch_blocks)
         offsets = []
         for i in range(num):
@@ -129,17 +129,17 @@ class BytecodeGenerator:
         for i, block in enumerate(branch_blocks):
             new_block = []
             for op in block:
-                if op.startswith("OP_JMP {jump_offset}"):
+                if op.startswith("OP_JMP {placeholder_offset}"):
                     new_block.append(f"OP_JMP {offsets[i]}")
                 else:
                     new_block.append(op)
             final_blocks.append(new_block)
 
         # Concatenate all branch blocks into a single list.
-        result = []
+        listof_entire_ifelse_statment = []
         for block in final_blocks:
-            result.extend(block)
-        return result
+            listof_entire_ifelse_statment.extend(block)
+        return listof_entire_ifelse_statment
     
     def add_local(self, var_name):
         if self.locals is None:
@@ -153,7 +153,7 @@ class BytecodeGenerator:
         """
         Traverse the AST and generate two lists:
           - main_code: Global op-codes (terminated with OP_HALT)
-          - func_defs: Concatenated function definition instructions.
+          - func_defs: Function definition instructions.
         """
         self.in_function = False
         self.bytecodes = []

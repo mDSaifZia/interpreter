@@ -1,13 +1,6 @@
 from custom_ast_nodes import *
 
 """
-Missing/Incomplete parts:
-    1. Functions
-    2. Negative numbers (Done)
-    3. List objects
-    4. If-else statements does not include else-if (Done)
-    5. Checking if-else, loop and while statement parsers are correct (Done)
-
 Logic:
     - Checks the first token of the statement to determine the type of statement
     - Calls the corresponding parsing function based on the type of statement
@@ -45,12 +38,12 @@ class Parser:
         return False
 
     def parse(self):            # Parse the entire program via running through each token and parsing it into an AST node. 
-        statements = []         # Returns a ast represented as a Program object containing multiple layers of the statements
+        statement_list = []         # Returns a ast represented as a Program object containing multiple layers of the statements
         while self.current_token() is not None:
-            stmt = self.parse_statement()
-            if stmt:
-                statements.append(stmt)
-        return Program(statements)
+            statement = self.parse_statement()
+            if statement:
+                statement_list.append(statement)
+        return Program(statement_list)
 
     def parse_statement(self):                  # Parse a single statement based on the current token using different parsing logic for different types of statements
         token = self.current_token()
@@ -71,7 +64,7 @@ class Parser:
                     return self.parse_return_stmt()
                 case "print":
                     return self.parse_print_stmt()
-        # Check for assignment statement: identifier followed by ASSIGN.
+        # Check for assignment statement: identifier followed by ASSIGN
         if token.type == "IDEN":
             next_token = self.peek()
             if next_token and next_token.type == "ASSIGN":
@@ -79,7 +72,7 @@ class Parser:
         # Check if it's a block.
         if token.type == "DELIMITER" and token.value == "{":
             return self.parse_block()
-        # Fallback: treat it as an expression statement.
+        # Otherwise, treat it as an expression statement. Useful for function calls without assignment of its return value
         return self.parse_expression_stmt()
     
     def parse_print_stmt(self):     # Parse a print statement
@@ -92,13 +85,13 @@ class Parser:
 
     def parse_block(self):          # Parse a block of statements enclosed in curly braces {}, for functions or loops or if-else statements
         self.consume("DELIMITER", "{")
-        statements = []
+        statement_list = []
         while self.current_token() and not (self.current_token().type == "DELIMITER" and self.current_token().value == "}"):
-            stmt = self.parse_statement()
-            if stmt:
-                statements.append(stmt)
+            statement = self.parse_statement()
+            if statement:
+                statement_list.append(statement)
         self.consume("DELIMITER", "}")
-        return Block(statements)
+        return Block(statement_list)
 
     def parse_var_decl(self):       # Parse a variable declaration statement, matches grammar for variable declaration
         self.consume("KEYWORD", "var")
@@ -115,11 +108,11 @@ class Parser:
         identifier = Identifier(id_token.value)
         self.consume("KEYWORD", "from")
         self.consume("DELIMITER", "(")
-        start_expr = self.parse_expression()
+        start_expr = self.parse_expression()    # start index
         self.consume("DELIMITER", ",")
-        end_expr = self.parse_expression()
+        end_expr = self.parse_expression()   # end index
         self.consume("DELIMITER", ")")
-        body = self.parse_block()
+        body = self.parse_block()           # loop body
         # Optionally consume a semicolon after the loop block.
         if self.current_token() and self.current_token().type == "DELIMITER" and self.current_token().value == ";":
             self.consume("DELIMITER", ";")
@@ -236,17 +229,17 @@ class Parser:
         if self.current_token() and self.current_token().type == "ARITHMETIC" and self.current_token().value in ("+", "-"):
             # If it's exclusively '+' operators, use right recursion.
             if self.current_token().value == "+":
-                pos_backup = self.pos
-                pure_plus = True
+                original_pos = self.pos
+                pure_plus_equation = True
                 # Look through the whole expression, consume all successive '+' and terms.
                 while self.current_token() and self.current_token().type == "ARITHMETIC":
                     if self.current_token().value != "+":
-                        pure_plus = False
+                        pure_plus_equation = False
                         break
                     self.consume("ARITHMETIC")
                     self.parse_term()
-                self.pos = pos_backup  # restore position
-                if pure_plus:
+                self.pos = original_pos  # restore position
+                if pure_plus_equation:
                     op = self.consume("ARITHMETIC").value  # must be '+'
                     right = self.parse_additive()
                     return BinaryOp(left, op, right)
@@ -270,17 +263,18 @@ class Parser:
     def parse_factor(self):         # Parse a factor, which can be a literal, identifier, function call, or a parenthesized expression (Most basic unit of an expression)
         token = self.current_token()
         if token.type in ("INTEGER", "FLOAT", "STRING", "BOOLEAN"):    # Check for literals e.g. 5, 3.14, "hello", true/false
-            self.consume(token.type)                                    # convert values to python objects for easier handling
-            if token.type == "INTEGER":
-                value = int(token.value)
-            elif token.type == "FLOAT":
-                value = float(token.value)
-            elif token.type == "BOOLEAN":
-                value = True if token.value == "true" else False
-            elif token.type == "STRING":
-                value = str(token.value[1:-1])  # Remove the surrounding quotes from the string literal
-            else:
-                raise Exception(f"Unexpected token {token}")
+            self.consume(token.type)                                    # convert values to python objects for easier handling            
+            match token.type:
+                case "INTEGER":
+                    value = int(token.value)
+                case "FLOAT":
+                    value = float(token.value)
+                case "BOOLEAN":
+                    value = True if token.value == "true" else False
+                case "STRING":
+                    value = str(token.value[1:-1])  # Remove the surrounding quotes from the string literal
+                case _:
+                    raise Exception(f"Unexpected token {token}")
             return Literal(value, type(value).__name__)
         elif token.type == "IDEN":      # Check for a function call
             self.consume("IDEN")
@@ -317,14 +311,10 @@ class Parser:
         return None
     
     def parse_assignment_stmt(self):        # Parse an assignment statement
-        # Consume the identifier on the left-hand side
         left_token = self.consume("IDEN")
         left = Identifier(left_token.value)
-        # Consume the assignment operator
         self.consume("ASSIGN", "=")
-        # Parse the right-hand side expression
         right = self.parse_expression()
-        # Consume the semicolon at the end of the statement
         self.consume("DELIMITER", ";")
         return Assignment(left, right)
     
