@@ -356,5 +356,81 @@ class BytecodeGenerator:
         self.visit(node.expr)
         self.bytecodes.append("OP_RETURN")
 
+    def visit_WhileStmt(self, node):
+        loop_start_pos = len(self.bytecodes)    # Starting position of the loop.
+        cond_bytecode = self.get_instructions(node.condition)   # Get bytecode instructions for the condition.
+        self.bytecodes.extend(cond_bytecode)
+        jmpif_index = len(self.bytecodes)
+        self.bytecodes.append("OP_JMPIF {placeholder_offset}")            # For jumping out of the loop if condition is false
+
+        body_bytecode = self.get_instructions(node.body)    # Get bytecode instructions for the body.
+        self.bytecodes.extend(body_bytecode)
+
+        loopback_offset = self.compute_size(self.bytecodes[loop_start_pos:])    # Get offset to jump back to the start of the loop
+        self.bytecodes.append(f"OP_JMP {-loopback_offset}")                     # Unconditionally jumps to the start of the loop
+
+        exitloop_offset = self.compute_size(self.bytecodes[jmpif_index+1:])
+        self.bytecodes[jmpif_index] = f"OP_JMPIF {exitloop_offset}"  # Replace the placeholder with the actual offset 
+
+    def visit_LoopStmt(self, node):
+        # Get bytecode for starting value of loop control variable.
+        startindex_bytecode = self.get_instructions(node.start_expr)
+        self.bytecodes.extend(startindex_bytecode)
+        if self.in_function and self.locals and node.var.name in self.locals:
+            idx = self.locals[node.var.name]
+            self.bytecodes.append(f"LOCAL {idx}")
+            self.bytecodes.append("OP_SET_LOCAL")
+        else:
+            self.bytecodes.append(f"ID {len(node.var.name)} {node.var.name}")
+            self.bytecodes.append("OP_SET_GLOBAL")
+        
+        loop_start_pos = len(self.bytecodes)    # Starting position of the loop.
+
+        # Get bytecode for ending value of loop control variable.
+        endindex_bytecode = self.get_instructions(node.end_expr)
+        self.bytecodes.extend(endindex_bytecode)
+        if self.in_function and self.locals and node.var.name in self.locals:
+            idx = self.locals[node.var.name]
+            self.bytecodes.append(f"LOCAL {idx}")
+            self.bytecodes.append("OP_GET_LOCAL")
+        else:
+            self.bytecodes.append(f"ID {len(node.var.name)} {node.var.name}")
+            self.bytecodes.append("OP_GET_GLOBAL")
+        
+        # Compare the loop control variable with the end value to see if we should exit the loop
+        self.bytecodes.append("OP_LEQ")
+        jmpif_index = len(self.bytecodes)
+        self.bytecodes.append("OP_JMPIF {placeholder_offset}")
+
+        # Get loop body bytecode instructions.
+        body_bytecode = self.get_instructions(node.body)
+        self.bytecodes.extend(body_bytecode)
+
+        # At the end of the loop body, we alsways increment the loop control variable by 1.
+        if self.in_function and self.locals and node.var.name in self.locals:
+            idx = self.locals[node.var.name]
+            self.bytecodes.append(f"LOCAL {idx}")
+            self.bytecodes.append("OP_GET_LOCAL")
+            self.bytecodes.append("INT 1")
+            self.bytecodes.append("OP_ADD")
+            self.bytecodes.append(f"LOCAL {idx}")
+            self.bytecodes.append("OP_SET_LOCAL")
+        else:
+            self.bytecodes.append(f"ID {len(node.var.name)} {node.var.name}")
+            self.bytecodes.append("OP_GET_GLOBAL")
+            self.bytecodes.append("INT 1")
+            self.bytecodes.append("OP_ADD")
+            self.bytecodes.append(f"ID {len(node.var.name)} {node.var.name}")
+            self.bytecodes.append("OP_SET_GLOBAL")
+        
+        # Jump back to the start of the loop
+        loopback_offset = self.compute_size(self.bytecodes[loop_start_pos:])
+        self.bytecodes.append(f"OP_JMP {-loopback_offset}")  # Unconditionally jumps to the start of the loop
+
+        # Get offset to exit the loop
+        exitloop_offset = self.compute_size(self.bytecodes[jmpif_index+1:])
+        self.bytecodes[jmpif_index] = f"OP_JMPIF {exitloop_offset}"
+
+
 
 

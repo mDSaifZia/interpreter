@@ -8,18 +8,26 @@ var x = 10;
 var y = 20;
 
 loop i from(1, 5) {
-    // Double the value of i
-    var doubled = i * 2;
-    }
-
-if (x > 25) {
-    var status = "high";
-} else if (x==25) { 
-    var status = "mid"; 
-} else {
-    var status = "low";
+    var doubled = y * 2;
 }
 
 while (x < y) {
     x = x + 1;
 }
+
+loop i from(1, 5) {
+    // Double the value of y
+    var doubled = y * 2;
+    loop j from(i, 6) {
+        print("hello");
+    }
+}
+
+while (x < y) {
+    x = x + 1;
+    loop z from(x,6) {
+        print("bye");
+    }
+}
+
+
