@@ -165,22 +165,41 @@ class BytecodeGenerator:
             func_defs.extend(func_code)
         return main_code, func_defs
 
-    def write_bytecode_files(self, ast, main_filename="main.bytecode"):
-        """
-        Generates instructions from the AST and writes them to main_filename file
-        Then appends the contents of self.func_bytecodes to main_filename.
-        """
-        main_code, func_defs = self.generate(ast)
-        with open(main_filename, 'w') as main_file:
-            for line in main_code:
-                main_file.write(line + "\n")
-        print(f"Main bytecode written to {main_filename}")
+    def write_bytecode(self, ast, output_filepath):
+        HEADER_SIZE = 64   # 64 bytes for header
+        AFT_MAIN_EXEC_PADDING = 4   # 4 bytes of padding after main execution
+        mainexec_start = HEADER_SIZE    # let main execution bytecode start right after the header
+        classdef_bytecode_start = 0        # no class def yet so zero
+        classdef_bytecode_end = 0
+        aft_mainexec_padding = bytes(AFT_MAIN_EXEC_PADDING)  # 4 bytes of zero padding after main execution bytecode
 
-        with open(main_filename, 'a') as main_file:
-            main_file.write("\n")
-            for line in func_defs:
-                main_file.write(line + "\n")
-        print(f"Function definitions bytecode written to {main_filename}")
+        # Get main execution, func def bytecodes and convert into bytes
+        mainexec_bytecode, funcdef_bytecode = self.generate(ast)
+        mainexec_bytecode_str = "\n".join(mainexec_bytecode) + "\n"
+        funcdef_bytecode_str = "\n".join(funcdef_bytecode) + "\n"
+        mainexec_inbytes = mainexec_bytecode_str.encode("utf-8")
+        funcdef_inbytes = funcdef_bytecode_str.encode("utf-8")
+        
+        # Get offset for function def
+        funcdef_start = HEADER_SIZE + len(mainexec_inbytes) + AFT_MAIN_EXEC_PADDING
+        funcdef_end = funcdef_start + len(funcdef_inbytes) - 1
+
+        # Create bytecode file header (64 bytes)
+        header = bytearray(HEADER_SIZE)
+        header[0:8] = funcdef_start.to_bytes(8, 'little')
+        header[8:16] = funcdef_end.to_bytes(8, 'little')
+        header[16:24] = (classdef_bytecode_start).to_bytes(8, 'little')
+        header[24:32] = (classdef_bytecode_end).to_bytes(8, 'little')
+        header[32:40] = mainexec_start.to_bytes(8, 'little')
+        header[40:64] = bytes(24)  # 24 bytes of zero padding
+
+        # Write everything to file
+        with open(output_filepath, 'wb') as f:
+            f.write(header)
+            f.write(mainexec_inbytes)
+            f.write(aft_mainexec_padding)
+            f.write(funcdef_inbytes)
+        print(f"Bytecodes written to: {output_filepath}")
 
     # =============================== AST traversal ===============================
     def visit(self, node):
