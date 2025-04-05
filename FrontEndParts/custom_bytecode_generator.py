@@ -341,9 +341,9 @@ class BytecodeGenerator:
         num_locals = len(self.locals)
         funcheader = []
         funcheader.append("OP_FUNCDEF")
-        funcheader.append(f"IDFUNC {len(node.name.name)} {node.name.name}")
         funcheader.append(f"NUMARGS {num_args}")
         funcheader.append(f"NUMVARS {num_locals}")
+        funcheader.append(f"IDFUNC {len(node.name.name)} {node.name.name}")
         funcheader.extend(func_body)
         funcheader.append("OP_ENDFUNC")
         self.func_bytecodes[node.name.name] = funcheader
