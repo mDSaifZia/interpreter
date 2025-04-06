@@ -185,6 +185,7 @@ class BytecodeGenerator:
         # Write everything to file
         with open(output_filepath, 'wb') as f:
             f.write(header)
+            f.write("\n".encode("utf-8"))
             f.write(mainexec_inbytes)
             f.write(funcdef_inbytes)
         print(f"Bytecodes written to: {output_filepath}")

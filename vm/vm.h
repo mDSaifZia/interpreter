@@ -20,38 +20,38 @@ typedef struct PrimitiveObject PrimitiveObject;
 /* Bytecode Instructions */
 typedef enum {
     // OPCODE instructions (SYNTAX: OP (NO ARG))
-    OP_ADD,        // Add two values
-    OP_SUB,        // Sub two values (consistency of sub op)
-    OP_MUL,        // Multiply
-    OP_DIV,        // Divide
-    OP_GET_GLOBAL, // Get a global variable
-    OP_SET_GLOBAL, // Set a global variable
-    OP_CALL,       // Call function
-    OP_RETURN,     // Return from function
-    OP_HALT,       // Stop execution
-    OP_JMP,        // JMP to an offset from current idx
-    OP_JMPIF,      // false ? JMP to and offset from curr idx
+    OP_ADD,        // Add two values [1 byte]
+    OP_MUL,        // Multiply [1 byte]
+    OP_SUB,        // Sub two values (consistency of sub op) [1 byte]
+    OP_DIV,        // Divide [1 byte]
+    OP_GET_GLOBAL, // Get a global variable [1 byte]
+    OP_SET_GLOBAL, // Set a global variable [1 byte]
+    OP_CALL,       // Call function [1 byte]
+    OP_RETURN,     // Return from function [1 byte]
+    OP_HALT,       // Stop execution [1 byte]
+    OP_JMP,        // JMP to an offset from current idx [1 byte]
+    OP_JMPIF,      // false ? JMP to and offset from curr idx [1 byte]
 
     // OPCODE primitives (SYNTAX: TYPE (ARG))
-    INT,           // prim obj int representation
-    FLOAT,         // prim obj float representation
-    BOOL,          // prim obj bool representation
-    STR,           // prim obj str representation
-    _NULL_,        // prim _NULL_ representation
+    INT,           // prim obj int representation [1 byte][8 bytes]
+    FLOAT,         // prim obj float representation [1 byte][8 bytes]
+    BOOL,          // prim obj bool representation [1 byte][1 byte]
+    STR,           // prim obj str representation [1 byte][]
+    _NULL_,        // prim _NULL_ representation [1 byte]
     ID,            // ID representation [1 byte opcode][2 byte ID length][ ID length number of bytes]
 
     // OPCODE flags (SYNTAX: FLAG (NO ARG))
     OP_FUNCDEF,    // Flag for start of function definition [1 byte]
     OP_ENDFUNC,    // Flag for end of function definition [1 byte]
-    OP_CLASSDEF,   // Flag for start of class definition
-    OP_ENDCLASS,  // Flag for end of class definition
+    OP_CLASSDEF,   // Flag for start of class definition [1 byte]
+    OP_ENDCLASS,  // Flag for end of class definition [1 byte]
 
     // OPCODE binary operators (SYNTAX: BIN_OP (NO ARGS))
-    OP_BLSHIFT,  // Bitwise left shift
-    OP_BRSHIFT,  // Bitwise right shift
-    OP_BXOR,     // Bitwise XOR
-    OP_BOR,      // Bitwise OR
-    OP_BAND,     // Bitwise AND
+    OP_BLSHIFT,  // Bitwise left shift [1 byte]
+    OP_BRSHIFT,  // Bitwise right shift [1 byte]
+    OP_BXOR,     // Bitwise XOR [1 byte]
+    OP_BOR,      // Bitwise OR [1 byte]
+    OP_BAND,     // Bitwise AND [1 byte]
 
     // OPCODE local variables (SYNTAX: OP (NO ARG)) (I may remove these)
     OP_GET_LOCAL,  // Get local variable [1 byte]
@@ -59,8 +59,10 @@ typedef enum {
     LOCAL,        // Analogous to ID for local variables arguments [1 byte][2 bytes]
 
     // OPCODES standard functions
-    OP_PRINT,       // prints to stdout
-    OP_INPUT,       // gets values from stdin
+    OP_PRINT,       // prints to stdout [1 byte]
+    OP_INPUT,       // gets values from stdin [1 byte]
+
+    OP_POP, //[1 byte]
 
     OP_MOD, // [1 byte]
     OP_NEQ, // [1 byte]
@@ -69,7 +71,6 @@ typedef enum {
     OP_GT, // [1 byte]
     OP_LEQ,// [1 byte]
     OP_LT // [1 byte]
-
 } OpCode;
 
 

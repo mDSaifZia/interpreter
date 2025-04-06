@@ -174,10 +174,14 @@ void load_functions(VM *vm, uint8_t *bytecode, size_t func_section_start,
     return;
   }
 
+//   printf("Reading from function section offset: %ld\n", function_section - bytecode);
+//   printf("First byte in section: 0x%02X\n", *function_section);
   while (function_section < section_end) {
     if (*function_section != OP_FUNCDEF) {
-      printf("Error: Expected function definition flag.\n");
-      return;
+        printf("Error: Expected function definition flag.\n");
+        printf("Reading from function section offset: %ld\n", function_section - bytecode);
+        printf("First byte in section: 0x%02X\n", *function_section);
+        exit(EXIT_FAILURE);
     }
     function_section++; // Move past OP_FUNCDEF byte
 
@@ -207,6 +211,7 @@ void load_functions(VM *vm, uint8_t *bytecode, size_t func_section_start,
     char *func_name = malloc(name_length + 1);
     memcpy(func_name, function_section, name_length);
     func_name[name_length] = '\0'; // Null terminate
+    printf("loading function: %s\n",func_name);
     function_section += name_length;
 
     // Create function entry
@@ -356,129 +361,134 @@ void run(VM *vm, const char *bytecode_file) {
     }
 
     case ID: { // [1 byte opcode][2 byte ID length][ ID length number of bytes]
-      uint16_t length;
-      memcpy(&length, vm->bytecode_ip,
-             sizeof(uint16_t)); // Read 2 bytes for ID length
-      vm->bytecode_ip =
-          (uint64_t *)((uint8_t *)vm->bytecode_ip +
-                       sizeof(uint16_t)); // Move past length field
+        uint16_t length;
+        memcpy(&length, vm->bytecode_ip,
+                sizeof(uint16_t)); // Read 2 bytes for ID length
+        vm->bytecode_ip =
+            (uint64_t *)((uint8_t *)vm->bytecode_ip +
+                        sizeof(uint16_t)); // Move past length field
 
-      char *identifier =
-          malloc(length + 1); // we malloced here so we must free when we hit
-                              // OP_GET_GLOBAL and OP_SET_GLOBAL
-      memcpy(identifier, vm->bytecode_ip, length); // Copy ID string
-      identifier[length] = '\0';                   // Null-terminate
+        char *identifier =
+            malloc(length + 1); // we malloced here so we must free when we hit
+                                // OP_GET_GLOBAL and OP_SET_GLOBAL
+        memcpy(identifier, vm->bytecode_ip, length); // Copy ID string
+        identifier[length] = '\0';                   // Null-terminate
 
-      vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +
-                                     length); // Move past ID bytes
+        vm->bytecode_ip = (uint64_t *)((uint8_t *)vm->bytecode_ip +
+                                        length); // Move past ID bytes
 
-      push(vm, identifier, IDENTIFIER); // Push identifier as raw string
-      break;
+        push(vm, identifier, IDENTIFIER); // Push identifier as raw string
+        break;
     }
 
     case _NULL_: {
-      push(vm, get_constant(vm, _NULL_, 0), PRIMITIVE_OBJ);
-      break;
+        push(vm, get_constant(vm, _NULL_, 0), PRIMITIVE_OBJ);
+        break;
     }
 
     case OP_ADD: { // modify this to first check the constant table before
-                   // attempting to create a new int
-      StackEntry b = pop(vm);
-      StackEntry a = pop(vm);
-      if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
+                    // attempting to create a new int
+        StackEntry b = pop(vm);
+        StackEntry a = pop(vm);
+        if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
         PrimitiveObject *result =
             ((PrimitiveObject *)a.value)
                 ->add(((PrimitiveObject *)a.value),
-                      ((PrimitiveObject *)
-                           b.value)); // cast back to original values
+                        ((PrimitiveObject *)
+                            b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
-      } else {
+        } else {
         printf("Error: Invalid types for ADD operation.\n"); // just disallowing other types of additions first but it can be implemented
-      }
-      break;
+        }
+        break;
     }
 
     case OP_SUB: {
-      StackEntry b = pop(vm);
-      StackEntry a = pop(vm);
+        StackEntry b = pop(vm);
+        StackEntry a = pop(vm);
 
-      if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
+        if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
         PrimitiveObject *a_obj = (PrimitiveObject *)a.value;
         PrimitiveObject *b_obj = (PrimitiveObject *)b.value;
 
         // Check if b is of type INT or FLOAT
         if ((b_obj->type == TYPE_int || b_obj->type == TYPE_float)) {
 
-          // Create a copy of b to negate
-          PrimitiveObject *negated_b;
+            // Create a copy of b to negate
+            PrimitiveObject *negated_b;
 
-          if (b_obj->type == TYPE_int) {
+            if (b_obj->type == TYPE_int) {
             // Create a negated copy of the int
             int64_t negated_value = -(((int_Object *)b_obj)->value);
             negated_b = (PrimitiveObject *)new_int(vm, negated_value);
-          } else { // TYPE_float
+            } else { // TYPE_float
             // Create a negated copy of the float
             double negated_value = -(((float_Object *)b_obj)->value);
             negated_b = (PrimitiveObject *)new_float(negated_value);
-          }
+            }
 
-          /*printf("%ld\n", ((int_Object *)a_obj)->value);*/
-          /*printf("%ld\n", ((int_Object *)negated_b)->value);*/
-          // Now add a and negated_b
-          PrimitiveObject *result = a_obj->add(a_obj, negated_b);
-          /*printf("%ld\n", ((int_Object *)result)->value);*/
-          /*printf("%d\n", result->type);*/
-          push(vm, result, PRIMITIVE_OBJ);
+            /*printf("%ld\n", ((int_Object *)a_obj)->value);*/
+            /*printf("%ld\n", ((int_Object *)negated_b)->value);*/
+            // Now add a and negated_b
+            PrimitiveObject *result = a_obj->add(a_obj, negated_b);
+            /*printf("%ld\n", ((int_Object *)result)->value);*/
+            /*printf("%d\n", result->type);*/
+            push(vm, result, PRIMITIVE_OBJ);
 
-          // If negated_b isn't in the constant pool, we should free it
-          // This would require tracking if it came from the constant pool
+            // If negated_b isn't in the constant pool, we should free it
+            // This would require tracking if it came from the constant pool
         } else {
-          printf("Error: Subtraction only supported between numeric types.\n");
+            printf("Error: Subtraction only supported between numeric types.\n");
         }
-      } else {
+        } else {
         printf("Error: Invalid types for SUB operation.\n");
-      }
-      break;
+        }
+        break;
     }
     case OP_MUL: { // modify this to first check constant table
-      StackEntry b = pop(vm);
-      StackEntry a = pop(vm);
-      if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
+        StackEntry b = pop(vm);
+        StackEntry a = pop(vm);
+        if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
         PrimitiveObject *result =
             ((PrimitiveObject *)a.value)
                 ->mul(((PrimitiveObject *)a.value),
-                      ((PrimitiveObject *)
-                           b.value)); // cast back to original values
+                        ((PrimitiveObject *)
+                            b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
-      } else {
+        } else {
         printf("Error: Invalid types for MUL operation.\n"); // just disallowing
-                                                             // other types of
-                                                             // multiplication
-                                                             // first but it can
-                                                             // be implemented
-      }
-      break;
+                                                                // other types of
+                                                                // multiplication
+                                                                // first but it can
+                                                                // be implemented
+        }
+        break;
     }
 
     case OP_DIV: { // modify this to first check the constant table
-      StackEntry b = pop(vm);
-      StackEntry a = pop(vm);
-      if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
+        StackEntry b = pop(vm);
+        StackEntry a = pop(vm);
+        if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
         PrimitiveObject *result =
             ((PrimitiveObject *)a.value)
                 ->div(((PrimitiveObject *)a.value),
-                      ((PrimitiveObject *)
-                           b.value)); // cast back to original values
+                        ((PrimitiveObject *)
+                            b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
-      } else {
+        } else {
         printf("Error: Invalid types for MUL operation.\n"); // just disallowing
-                                                             // other types of
-                                                             // multiplication
-                                                             // first but it can
-                                                             // be implemented
-      }
-      break;
+                                                                // other types of
+                                                                // multiplication
+                                                                // first but it can
+                                                                // be implemented
+        }
+        break;
     }
+
+    case OP_POP:
+        // printf("executing OP_POP\n");
+        pop(vm);
+        break;
 
     /* Handle all operations at once */
     case OP_EQ:
@@ -545,6 +555,7 @@ void run(VM *vm, const char *bytecode_file) {
     stack_top
     */
     case OP_GET_GLOBAL: {
+        // printf("popping from global\n");
       StackEntry id = pop(vm);
 
       if (id.entry_type != IDENTIFIER) {
@@ -577,7 +588,9 @@ void run(VM *vm, const char *bytecode_file) {
     stack_top
     */
     case OP_SET_GLOBAL: {
+    //   printf("popping id\n");
       StackEntry id = pop(vm);
+    //   printf("popping value\n");
       StackEntry value = pop(vm);
 
       if (id.entry_type != IDENTIFIER) {
@@ -697,6 +710,7 @@ void run(VM *vm, const char *bytecode_file) {
       }
 
       char *func_name = (char *)func_id.value;
+    //   printf("Calling func: %s\n", func_name);
       FunctionEntry *func =
           (FunctionEntry *)hashmap_get(vm->functions, func_name);
 
@@ -710,6 +724,7 @@ void run(VM *vm, const char *bytecode_file) {
       // Pop and assign arguments from the stack (in reverse order)
       StackEntry args[func->num_args];
       for (int i = func->num_args - 1; i >= 0; i--) {
+        // printf("popping arg: %d\n", i);
         args[i] = pop(vm);
       }
 
@@ -752,6 +767,7 @@ void run(VM *vm, const char *bytecode_file) {
 
     default:
       printf("Unknown instruction: 0x%02X\n", instruction);
+      exit(EXIT_FAILURE);
       break;
     }
   }
@@ -767,6 +783,7 @@ void run(VM *vm, const char *bytecode_file) {
 void push(VM *vm, void *value, StackEntryType type) {
   Stack *stack = &vm->stack; // Use a pointer to modify the actual stack in VM
   StackEntry entry;
+//   printf("pushing: %d\n", ((PrimitiveObject *) entry.value)->type);
   entry.value = value;
   entry.entry_type = type;
 
