@@ -177,19 +177,10 @@ class BytecodeGenerator:
         funcdef_bytecode_str = "\n".join(funcdef_bytecode) + "\n"
         mainexec_inbytes = mainexec_bytecode_str.encode("utf-8")
         funcdef_inbytes = funcdef_bytecode_str.encode("utf-8")
-        
-        # Get offset for function def
-        funcdef_start = HEADER_SIZE + len(mainexec_inbytes)
-        funcdef_end = funcdef_start + len(funcdef_inbytes) - 1
 
         # Create bytecode file header (64 bytes)
         header = bytearray(HEADER_SIZE)
-        header[0:8] = funcdef_start.to_bytes(8, 'little')
-        header[8:16] = funcdef_end.to_bytes(8, 'little')
-        header[16:24] = (classdef_bytecode_start).to_bytes(8, 'little')
-        header[24:32] = (classdef_bytecode_end).to_bytes(8, 'little')
-        header[32:40] = mainexec_start.to_bytes(8, 'little')
-        header[40:64] = bytes(24)  # 24 bytes of zero padding
+        header[::] = bytes(HEADER_SIZE)  # Initialize header with zero bytes
 
         # Write everything to file
         with open(output_filepath, 'wb') as f:

@@ -11,31 +11,13 @@ from custom_bytecode_generator import BytecodeGenerator
 def readBytecodeFile(filepath):
     with open(filepath, "rb") as f:
         header = f.read(64)
-        funcdef_start = int.from_bytes(header[0:8], byteorder='little')
-        funcdef_end = int.from_bytes(header[8:16], byteorder='little')
-        classdef_start = int.from_bytes(header[16:24], byteorder='little')
-        classdef_end = int.from_bytes(header[24:32], byteorder='little')
-        mainexec_start = int.from_bytes(header[32:40], byteorder='little')
-        
         print("\n===================== Header =====================")
-        print(f"Function start: {funcdef_start}")
-        print(f"Function end: {funcdef_end}")
-        print(f"Class start: {classdef_start}")
-        print(f"Class end: {classdef_end}")
-        print(f"Main execution start: {mainexec_start}")
-        
-        # Compute main execution code size
-        main_code_size = funcdef_start - 64
-        main_code_bytes = f.read(main_code_size)
-        main_code = main_code_bytes.decode("utf-8")
-        print("\n===================== Main Exec =====================")
-        print(main_code)
-        
-        # func defs
-        func_defs_bytes = f.read()
-        func_defs = func_defs_bytes.decode("utf-8")
-        print("\n===================== Function Def =====================")
-        print(func_defs)
+        print(header)
+
+        print("\n===================== Main exec and Func def bytecode =====================")
+        remaining_code = f.read()
+        print(remaining_code.decode('utf-8'))
+
 
 def lexical_analysis(source_code):
     lexer = Lexer(source_code)
