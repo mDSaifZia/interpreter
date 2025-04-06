@@ -195,7 +195,7 @@ int compile_ir(const char *input_path, const char *output_path) {
             char *arg = strtok(NULL, " \t\r\n");
             int32_t offset = atoi(arg);
             printf("  %s offset: %d\n", token, offset);
-            printf("OP_JMP: %d, OP_JMP_IF: %d\n",OP_JMP,OP_JMPIF);
+            printf("OP_JMP: %x, OP_JMPIF: %x\n",OP_JMP,OP_JMPIF);
             write_uint8(out, strcmp(token, "OP_JMP") == 0 ? OP_JMP : OP_JMPIF); byte_offset += 1;
             write_int32(out, offset); byte_offset += 4;
 

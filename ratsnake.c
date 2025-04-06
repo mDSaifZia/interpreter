@@ -37,8 +37,14 @@ int main(int argc, char const *argv[]) {
     run(vm, output_bin);
 
     // just for testing
-    GlobalEntry* test = hashmap_get(vm->globals, "result");
-    printf("result = %ld\n", ((int_Object*)test->value)->value);
+    char* var_name1 = "test";
+
+    GlobalEntry* test = hashmap_get(vm->globals, var_name1);
+    printf("%s = %ld\n", var_name1, ((int_Object*)test->value)->value);
+
+    // char* var_name2 = "test2";
+    // GlobalEntry* test2 = hashmap_get(vm->globals, var_name2);
+    // printf("%s = %ld\n", var_name2, ((int_Object*)test2->value)->value);
 
     free(output_bin);
     return 0;

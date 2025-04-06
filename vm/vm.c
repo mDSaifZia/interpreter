@@ -184,7 +184,7 @@ void load_functions(VM *vm, uint8_t *bytecode, size_t func_section_start,
         exit(EXIT_FAILURE);
     }
     function_section++; // Move past OP_FUNCDEF byte
-
+    
     // Read num_args (2 bytes)
     uint16_t num_args;
     memcpy(&num_args, function_section, sizeof(uint16_t));
@@ -235,22 +235,55 @@ void load_functions(VM *vm, uint8_t *bytecode, size_t func_section_start,
     // Free the temporary function name
     free(func_name);
 
-    // Function_end points to current location in function body
     uint8_t *function_end = function_section;
-    while (function_end < section_end && *function_end != OP_ENDFUNC) {
-      function_end++;
-    }
 
-    // Move to the next function definition
+    while (function_end < section_end) {
+      uint8_t opcode = *function_end;
+
+      if (opcode == OP_ENDFUNC) {
+        function_end++; // include the OP_ENDFUNC in the body
+        break;
+      }
+
+      function_end++; // move past opcode
+
+      // this switch statement is here to ensure we don't accidentally read the argument bytes as opcodes
+      switch (opcode) {
+        case INT:
+        case FLOAT:
+          function_end += 8; break;
+
+        case BOOL:
+          function_end += 1; break;
+
+        case STR: {
+          uint32_t len;
+          memcpy(&len, function_end, 4);
+          function_end += 4 + len;
+          break;
+        }
+
+        case LOCAL:
+            function_end += 2;
+            break;
+
+        case ID: {
+          uint16_t len;
+          memcpy(&len, function_end, 2);
+          function_end += 2 + len;
+          break;
+        }
+
+        case OP_JMP:
+        case OP_JMPIF:
+          function_end += 4; break;
+
+        // any other opcodes are single byte
+        default:
+          break;
+      }
+    }
     function_section = function_end;
-
-    // Skip past OP_ENDFUNC
-    if (function_section < section_end && *function_section == OP_ENDFUNC) {
-      function_section++;
-    } else {
-      printf("Warning: End of function marker not found for %s.\n",
-             func_entry->name);
-    }
   }
 }
 
