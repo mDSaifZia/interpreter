@@ -18,7 +18,7 @@ class BytecodeGenerator:
          - "STR <len> <string>": 1 (opcode) + 4 (length field) + (len) bytes.
          - "ID <num> <name>": 1 (opcode) + 2 (num field) + (num) bytes.
          - "IDFUNC <num> <name>": 1 + 2 + (num) bytes.
-         - "LOCAL <index>": 1 + 2 + (length of index as string).
+         - "LOCAL <index>": 1 + 2
          - Jump instructions ("OP_JMP" and "OP_JMPIF"): 1 (opcode) + 4 (offset) = 5 bytes.
          - "NUMARGS"/"NUMVARS": 1 + 4 = 5 bytes.
          - All other OP_* with no arguments: 1 byte.
@@ -45,8 +45,7 @@ class BytecodeGenerator:
                     num = 0
                 return 1 + 2 + num
             case "LOCAL":
-                idx_str = tokens[1] if len(tokens) > 1 else ""
-                return 1 + 2 + len(idx_str)
+                return 1 + 2
             case "OP_JMP" | "OP_JMPIF" | "NUMARGS" | "NUMVARS":
                 return 1 + 4
             case _:
