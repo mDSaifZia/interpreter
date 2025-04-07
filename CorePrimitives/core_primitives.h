@@ -30,6 +30,7 @@ typedef struct PrimitiveObject PrimitiveObject;
 /* Function pointer type for binary operations */
 typedef PrimitiveObject* (*BinaryOp)(PrimitiveObject*, PrimitiveObject*);
 typedef int (*CompareOp)(PrimitiveObject*, PrimitiveObject*);
+typedef char* (*DunderString)(PrimitiveObject*);
 
 /* Base primitive object */
 struct PrimitiveObject {
@@ -46,6 +47,7 @@ struct PrimitiveObject {
     CompareOp gt;
     CompareOp leq;
     CompareOp lt;
+    DunderString __str__;
 };
 
 /* It is crucial that the primitive object base is the first feild in these derivative structs as it allows us
@@ -161,5 +163,12 @@ PrimitiveObject* bitwise_AND(PrimitiveObject* self, PrimitiveObject* other);
 PrimitiveObject* bitwise_OR(PrimitiveObject* self, PrimitiveObject* other);
 PrimitiveObject* bitwise_RSHIFT(PrimitiveObject* self, PrimitiveObject* other);
 PrimitiveObject* bitwise_LSHIFT(PrimitiveObject* self, PrimitiveObject* other);
+
+/* PrimitiveObject __str__ */
+char* int_to_string(PrimitiveObject* self);
+char* float_to_string(PrimitiveObject* self);
+char* bool_to_string(PrimitiveObject* self);
+char* null_to_string(PrimitiveObject* self);
+char* str_to_string(PrimitiveObject* self);
 
 #endif

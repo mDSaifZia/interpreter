@@ -46,6 +46,7 @@ int_Object* new_int(VM* vm, int64_t value) {
     obj->base.gt  = gt_int;
     obj->base.leq = leq_int;
     obj->base.lt  = lt_int;
+    obj->base.__str__ = int_to_string;
     obj->value = (int64_t) value;
     obj->bwAND = (BinaryOp)bitwise_AND;
     obj->bwXOR = (BinaryOp)bitwise_XOR;
@@ -70,6 +71,7 @@ float_Object* new_float(double value) {
     obj->base.gt  = gt_float;
     obj->base.leq = leq_float;
     obj->base.lt  = lt_float;
+    obj->base.__str__= float_to_string;
     obj->value = (float) value;
 
     return obj;
@@ -106,6 +108,7 @@ bool_Object* new_bool(VM* vm, int bool_value) {
     obj->base.gt  = gt_bool;
     obj->base.leq = leq_bool;
     obj->base.lt  = lt_bool;
+    obj->base.__str__ = bool_to_string;
     obj->value = (int8_t)normalized;
 
     return obj;
@@ -130,6 +133,7 @@ str_Object* new_str(const char* string_value) {
     obj->base.gt  = gt_str;
     obj->base.leq = leq_str;
     obj->base.lt  = lt_str;
+    obj->base.__str__ = str_to_string;
     obj->value = strdup(string_value); // This makes a copy of the string which always makes it mutable
 
     return obj;
@@ -158,6 +162,7 @@ Null_Object* get_null(VM* vm) {
     obj->base.gt  = NULL;
     obj->base.leq = NULL;
     obj->base.lt  = NULL;
+    obj->base.__str__ = null_to_string;
 
     return obj;
 }
@@ -863,4 +868,37 @@ int lt_str(PrimitiveObject* self, PrimitiveObject* other) {
     char* b = ((str_Object*)other)->value;
 
     return strcmp(a, b) < 0;
+}
+
+// /* //////////////////////  __str__  ////////////////////// */
+char* int_to_string(PrimitiveObject* obj) {
+    int_Object* intObj = (int_Object*)obj;
+    char* buffer = malloc(32);  // enough for 64-bit integers
+    if (buffer) {
+        snprintf(buffer, 32, "%ld", intObj->value);
+    }
+    return buffer;
+}
+
+char* float_to_string(PrimitiveObject* obj) {
+    float_Object* floatObj = (float_Object*)obj;
+    char* buffer = malloc(64);
+    if (buffer) {
+        snprintf(buffer, 64, "%lf", floatObj->value);
+    }
+    return buffer;
+}
+
+char* bool_to_string(PrimitiveObject* obj) {
+    bool_Object* boolObj = (bool_Object*)obj;
+    return strdup(boolObj->value ? "True" : "False");
+}
+
+char* null_to_string(PrimitiveObject* obj) {
+    return strdup("NULL");
+}
+
+char* str_to_string(PrimitiveObject* obj) {
+    str_Object* strObj = (str_Object*)obj;
+    return strdup(strObj->value); //copy so we don't free the value of the primitive (as technically thats the job of the garbage collector)
 }

@@ -211,7 +211,7 @@ void load_functions(VM *vm, uint8_t *bytecode, size_t func_section_start,
     char *func_name = malloc(name_length + 1);
     memcpy(func_name, function_section, name_length);
     func_name[name_length] = '\0'; // Null terminate
-    printf("loading function: %s\n",func_name);
+    // printf("loading function: %s\n",func_name);
     function_section += name_length;
 
     // Create function entry
@@ -514,6 +514,23 @@ void run(VM *vm, const char *bytecode_file) {
                                                                 // multiplication
                                                                 // first but it can
                                                                 // be implemented
+        }
+        break;
+    }
+
+      case OP_PRINT: {
+        StackEntry value = pop(vm);
+        if (value.entry_type == PRIMITIVE_OBJ) {
+            PrimitiveObject* obj = (PrimitiveObject*) value.value;
+            if (obj->__str__) { // for primitives implemented this should never be NULL, might even cause issues if str is ""
+                char* repr = obj->__str__(obj);
+                printf("%s\n", repr);
+                free(repr);  // since we allocated memory to the representation when calling __str__
+            } else {
+                printf("<unprintable primitive object>\n");
+            }
+        } else {
+            printf("<non-primitive value cannot be printed>\n");
         }
         break;
     }

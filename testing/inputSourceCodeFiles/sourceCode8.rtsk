@@ -67,12 +67,40 @@ fn testloop(a) {
     return a;
 }
 
+fn testloopwhile(a) {
+    var res = 0;
+    while (a >= 0) {
+        a = a - 1;
+        res = res + 1;
+    }
+    return res;
+}
+
 fn greet(name) {
     return "hello there, " + name + "!";
 }
 
+fn print_tree(a) {
+    loop i from(0,a) {
+        print(" "*(a-i) + "X"*(i*2+1));
+    }
+    var trunk = " "*(a-2) + "|  |";
+    print(trunk);
+    print(trunk);
+    print(" ");
+}
+
 f(1,d);
+
+print_tree(20);
 
 var name = "wowza";
 
 var test = greet(name);  
+
+var test2 = fib(4*e);
+
+print("test:");
+print(test);
+print("test2:");
+print(test2);

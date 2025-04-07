@@ -1,2 +1,4 @@
 *.exe
 ratsnake
+.vscode
+testing/outputText(forReference)/*
