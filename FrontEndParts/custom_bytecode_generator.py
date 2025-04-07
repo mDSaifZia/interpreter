@@ -385,6 +385,7 @@ class BytecodeGenerator:
         self.bytecodes.extend(body_bytecode)
 
         loopback_offset = self.compute_size(self.bytecodes[loop_start_pos:])    # Get offset to jump back to the start of the loop
+        loopback_offset += 5  # Add 5 bytes for the OP_JMP instruction itself when going backwards
         self.bytecodes.append(f"OP_JMP {-loopback_offset}")                     # Unconditionally jumps to the start of the loop
 
         exitloop_offset = self.compute_size(self.bytecodes[jmpif_index+1:])
@@ -453,6 +454,7 @@ class BytecodeGenerator:
         
         # Jump back to the start of the loop
         loopback_offset = self.compute_size(self.bytecodes[loop_start_pos:])
+        loopback_offset += 5  # Add 5 bytes for the OP_JMP instruction itself when going backwards
         self.bytecodes.append(f"OP_JMP {-loopback_offset}")  # Unconditionally jumps to the start of the loop
 
         # Get offset to exit the loop
