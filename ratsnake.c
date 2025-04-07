@@ -40,7 +40,7 @@ int main(int argc, char const *argv[]) {
     char* var_name1 = "test";
 
     GlobalEntry* test = hashmap_get(vm->globals, var_name1);
-    printf("%s = %ld\n", var_name1, ((int_Object*)test->value)->value);
+    printf("%s = %s\n", var_name1, ((str_Object*)test->value)->value);
 
     // char* var_name2 = "test2";
     // GlobalEntry* test2 = hashmap_get(vm->globals, var_name2);
