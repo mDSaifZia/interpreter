@@ -68,7 +68,7 @@ fn testloop(a) {
 }
 
 fn greet(name) {
-    return "hello there, " + name;
+    return "hello there, " + name + "!";
 }
 
 f(1,d);

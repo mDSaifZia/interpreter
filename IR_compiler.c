@@ -247,9 +247,9 @@ int compile_ir(const char *input_path, const char *output_path) {
     fclose(out);
 
     printf(GREEN "Patched header written:\n" WHITE);
-    printf("  execution_section_start = %u\n", hdr.execution_section_start);
-    printf("  func_section_start      = %u\n", hdr.func_section_start);
-    printf("  func_section_end        = %u\n", hdr.func_section_end);
+    printf("  execution_section_start = %lu\n", hdr.execution_section_start);
+    printf("  func_section_start      = %lu\n", hdr.func_section_start);
+    printf("  func_section_end        = %lu\n", hdr.func_section_end);
     printf("  Compilation complete.\n");
 
     return 0;
