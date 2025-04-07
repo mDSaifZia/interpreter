@@ -164,7 +164,7 @@ class BytecodeGenerator:
             func_defs.extend(func_code)
         return main_code, func_defs
 
-    def write_bytecode(self, ast, output_filepath, output_filepath_text):
+    def write_bytecode(self, ast, output_filepath):
         HEADER_SIZE = 64   # 64 bytes for header
         mainexec_start = HEADER_SIZE    # let main execution bytecode start right after the header
         classdef_bytecode_start = 0        # no class def yet so zero
@@ -188,8 +188,6 @@ class BytecodeGenerator:
             f.write(mainexec_inbytes)
             f.write(funcdef_inbytes)
         print(f"Bytecodes written to: {output_filepath}")
-
-        self.write_textfile(ast, output_filepath_text)  # Write text file for reference
 
     def write_textfile(self, ast, output_filepath):
         # For debugging: write the bytecode to a text file also

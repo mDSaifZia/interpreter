@@ -44,7 +44,8 @@ def semantic_analysis(ast):
 
 def generate_bytecode(ast, output_file, output_file_text):
     generator = BytecodeGenerator()
-    generator.write_bytecode(ast, output_file, output_file_text)
+    generator.write_bytecode(ast, output_file)
+    # generator.write_text(ast, output_file_text)
 
 # ================================================ Main ================================================
 def main():
