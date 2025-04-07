@@ -396,8 +396,12 @@ class BytecodeGenerator:
         # Get bytecode for starting value of loop control variable.
         startindex_bytecode = self.get_instructions(node.start_expr)
         self.bytecodes.extend(startindex_bytecode)
-        if self.in_function and self.locals and node.var.name in self.locals:
-            idx = self.locals[node.var.name]
+        if self.in_function:
+            # Ensure the loop variable is in the local scope.
+            if self.locals is None or node.var.name not in self.locals:
+                idx = self.add_local(node.var.name)
+            else:
+                idx = self.locals[node.var.name]
             self.bytecodes.append(f"LOCAL {idx}")
             self.bytecodes.append("OP_SET_LOCAL")
         else:
@@ -409,8 +413,11 @@ class BytecodeGenerator:
         # Get bytecode for ending value of loop control variable.
         endindex_bytecode = self.get_instructions(node.end_expr)
         self.bytecodes.extend(endindex_bytecode)
-        if self.in_function and self.locals and node.var.name in self.locals:
-            idx = self.locals[node.var.name]
+        if self.in_function:
+            if self.locals is None or node.var.name not in self.locals:
+                idx = self.add_local(node.var.name)
+            else:
+                idx = self.locals[node.var.name]
             self.bytecodes.append(f"LOCAL {idx}")
             self.bytecodes.append("OP_GET_LOCAL")
         else:
@@ -427,8 +434,11 @@ class BytecodeGenerator:
         self.bytecodes.extend(body_bytecode)
 
         # At the end of the loop body, we alsways increment the loop control variable by 1.
-        if self.in_function and self.locals and node.var.name in self.locals:
-            idx = self.locals[node.var.name]
+        if self.in_function:
+            if self.locals is None or node.var.name not in self.locals:
+                idx = self.add_local(node.var.name)
+            else:
+                idx = self.locals[node.var.name]
             self.bytecodes.append(f"LOCAL {idx}")
             self.bytecodes.append("OP_GET_LOCAL")
             self.bytecodes.append("INT 1")
