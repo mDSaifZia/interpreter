@@ -408,9 +408,6 @@ class BytecodeGenerator:
         
         loop_start_pos = len(self.bytecodes)    # Starting position of the loop.
 
-        # Get bytecode for ending value of loop control variable.
-        endindex_bytecode = self.get_instructions(node.end_expr)
-        self.bytecodes.extend(endindex_bytecode)
         if self.in_function:
             if self.locals is None or node.var.name not in self.locals:
                 idx = self.add_local(node.var.name)
@@ -421,6 +418,9 @@ class BytecodeGenerator:
         else:
             self.bytecodes.append(f"ID {len(node.var.name)} {node.var.name}")
             self.bytecodes.append("OP_GET_GLOBAL")
+        # Get bytecode for ending value of loop control variable.
+        endindex_bytecode = self.get_instructions(node.end_expr)
+        self.bytecodes.extend(endindex_bytecode)
         
         # Compare the loop control variable with the end value to see if we should exit the loop
         self.bytecodes.append("OP_LEQ")
