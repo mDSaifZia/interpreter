@@ -9,10 +9,7 @@ class SymbolTable:
 
     def define(self, name, type, is_control_var=False):
         current_scope = self.scopes[-1]
-        if name in current_scope:
-            existing_type = current_scope[name]
-            if existing_type != type:
-                raise Exception(f"Type Error: Can't redefine '{name}' from '{existing_type}' to '{type}'")
+        # Allow redefining variables with any type
         current_scope[name] = type
         if is_control_var:
             self.control_vars.add(name)
@@ -73,14 +70,14 @@ class SemanticChecker:
     
     def visit_FunctionDecl(self, node):
         # Define the function in the current scope
-        self.symbol_table.define_function(node.name.name, [(param.name, "int") for param in node.params])  # Assume parameters are integers for now
+        self.symbol_table.define_function(node.name.name, [(param.name, None) for param in node.params])  # None because we disable the type checks for parameters
 
         # Enter function scope
         self.symbol_table.enter_function_scope()
 
         # Define function parameters
         for param in node.params:
-            self.symbol_table.define(param.name, "int")  # Assume parameters are integers for now
+            self.symbol_table.define(param.name, None)  # None because we disable the type checks for parameters
 
         # Set the current function
         self.current_function = node.name.name
@@ -120,28 +117,16 @@ class SemanticChecker:
             raise Exception(f"Semantic Error: Cannot modify control variable '{node.left.name}'")
     
         value_type = self.check(node.right)
-
-        # Type compatibility checks
-        if var_type == "float" and value_type == "int":
-            value_type = "float"
-        elif var_type == "int" and value_type == "float":
-            value_type = "float"
-        elif var_type == "boolean" and value_type != "boolean":
-            raise Exception(f"Type Error: Cannot assign '{value_type}' to boolean variable '{node.left.name}'")
-
-        if var_type != value_type:
-            raise Exception(f"Type Incompatibility Error: Cannot convert '{value_type}' to '{var_type}'")
-
         self.symbol_table.define(node.left.name, value_type)
 
     def visit_Literal(self, node):
-        if isinstance(node.value, int):
+        if type(node.value) == int:
             return "int"
-        elif isinstance(node.value, float):
+        elif type(node.value) == float:
             return "float"
-        elif isinstance(node.value, str):
+        elif type(node.value) == str:
             return "string"
-        elif node.value in {"true", "false"}:
+        elif type(node.value) == bool:
             return "boolean"
         raise Exception(f"Unsupported literal type: {type(node.value)}")
 
@@ -149,17 +134,24 @@ class SemanticChecker:
         left_type = self.check(node.left)
         right_type = self.check(node.right)
 
+        # Only restrict division by zero
         if node.op == '/' and right_type == "int" and isinstance(node.right, Literal) and node.right.value == 0:
             raise Exception("Division by zero error")
+        
+        # Relational operators always return boolean
+        if node.op in {"==", "!=", "<", "<=", ">", ">="}:
+            return "boolean"
 
-        if left_type != right_type:
-            if left_type == "int" and right_type == "float":
-                return "float"
-            if left_type == "float" and right_type == "int":
-                return "float"
-            raise Exception(f"Arithmetic Error: Cannot apply '{node.op}' between '{left_type}' and '{right_type}'")
-
-        return left_type
+        # Allow all other type combinations
+        # Return the most general type
+        if "float" in (left_type, right_type):
+            return "float"
+        elif "string" in (left_type, right_type):
+            return "string"
+        elif "boolean" in (left_type, right_type):
+            return "boolean"
+        else:
+            return "int"
 
     def visit_UnaryOp(self, node):
         operand_type = self.check(node.operand)
@@ -194,7 +186,7 @@ class SemanticChecker:
         # Enter a new scope for the loop
         self.symbol_table.enter_scope()
         
-         # Define the loop control variable and mark it as a control variable
+        # Define the loop control variable and mark it as a control variable
         self.symbol_table.define(node.var.name, "int", is_control_var=True)
         
         # Check the loop body
@@ -232,12 +224,9 @@ class SemanticChecker:
         if len(node.arguments) != len(self.symbol_table.function_params[node.callee.name]):
             raise Exception(f"Function Argument Error: '{node.callee.name}' expects {len(self.symbol_table.function_params[node.callee.name])} arguments, but got {len(node.arguments)}")
 
-        # Check the types of the arguments
-        for i, arg in enumerate(node.arguments):
-            arg_type = self.check(arg)
-            param_type = self.symbol_table.function_params[node.callee.name][i]
-            if arg_type != param_type:
-                raise Exception(f"Type Error: Argument {i + 1} of '{node.callee.name}' expects type '{param_type}', but got '{arg_type}'")
+        # Check the type of the argument
+        for arg in node.arguments:
+            self.check(arg)  # just validate the argument, not comparing its type.
         
     def check_for_infinite_recursion(self, node):
         if isinstance(node, Block):

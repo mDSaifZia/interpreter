@@ -6,7 +6,7 @@ from custom_parser import Parser
 from custom_bytecode_generator import BytecodeGenerator
 
 #To run this file from proj dir: 
-# python FrontEndParts/frontend_manager.py -i testing/inputSourceCodeFiles/sourceCode1.rtsk
+# python FrontEndParts/frontend_manager.py -i testing/inputSourceCodeFiles/sourceCode[source code number].rtsk
 
 def readBytecodeFile(filepath):
     with open(filepath, "rb") as f:
