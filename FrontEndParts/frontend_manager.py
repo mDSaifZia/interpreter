@@ -55,7 +55,7 @@ def main():
     args = parser_arg.parse_args()
 
     inputfileName = args.input.split('/')[-1].split('.')[0]  # get the file name without extension
-    output_file = f"testing/outputByteCodeFiles/main{inputfileName[-1]}.bytecode"
+    output_file = f"{inputfileName}.bytecode"
     output_file_text = f"testing/outputText(forReference)/text{inputfileName[-1]}.txt"
 
     # Read the source code from the input file.
