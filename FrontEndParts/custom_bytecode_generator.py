@@ -187,7 +187,7 @@ class BytecodeGenerator:
             f.write("\n".encode("utf-8"))
             f.write(mainexec_inbytes)
             f.write(funcdef_inbytes)
-        print(f"Bytecodes written to: {output_filepath}")
+        # print(f"Bytecodes written to: {output_filepath}")
 
     def write_textfile(self, ast, output_filepath):
         # For debugging: write the bytecode to a text file also
@@ -198,7 +198,7 @@ class BytecodeGenerator:
             f.write(mainexec_bytecode_str)
             f.write("\n")
             f.write(funcdef_bytecode_str)
-        print(f"Bytecodes written to: {output_filepath}")
+        # print(f"Bytecodes written to: {output_filepath}")
 
     # =============================== AST traversal ===============================
     def visit(self, node):

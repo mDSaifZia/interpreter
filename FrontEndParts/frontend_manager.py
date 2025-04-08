@@ -12,27 +12,27 @@ from custom_bytecode_generator import BytecodeGenerator
 def readBytecodeFile(filepath):
     with open(filepath, "rb") as f:
         header = f.read(64)
-        print("\n===================== Header =====================")
-        print(header)
+        # print("\n===================== Header =====================")
+        # print(header)
 
-        print("\n===================== Main exec and Func def bytecode =====================")
+        # print("\n===================== Main exec and Func def bytecode =====================")
         remaining_code = f.read()
-        print(remaining_code.decode('utf-8'))
+        # print(remaining_code.decode('utf-8'))
 
 
 def lexical_analysis(source_code):
     lexer = Lexer(source_code)
     tokens = lexer.tokenize()   # produces a list of Token objects
-    print("Tokens:")
-    for token in tokens:
-        print(token)
+    # print("Tokens:")
+    # for token in tokens:
+    #     print(token)
     return tokens
 
 def syntax_analysis(tokens):
     parser_obj = Parser(tokens) 
     ast = parser_obj.parse()    # produces an Abstract Syntax Tree (AST) from the list of Token objects
-    print("\nAST:")
-    print(ast)
+    # print("\nAST:")
+    # print(ast)
     return ast
 
 def semantic_analysis(ast):
