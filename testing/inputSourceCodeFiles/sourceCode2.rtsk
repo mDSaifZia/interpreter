@@ -33,6 +33,35 @@ fn testIfElse(x, y) {
     return status;
 }
 
+fn testDoubleIfElse(x, y) {
+    if (x > y) {
+        var status = "high";
+        var diff = x - y;
+    } else if (x == y) {
+        var status = "mid";
+        var diff = 0;
+    } else {
+        var status = "low";
+        var diff = y - x;
+    }
+
+    return status;
+}
+
+fn testMixIfElse(x, y) {
+    if (x > y) {
+        var status = "high";
+        var diff = x - y;
+    } else if (x == y) {
+        var status = "mid";
+        var diff = 0;
+    } else {
+        var status = "low";
+    }
+
+    return diff;
+}
+
 fn testwhlle(a, b) {
     while (a < b) {
         a = a + 1;

@@ -172,6 +172,16 @@ class SemanticChecker:
         condition_type = self.check(node.condition)
         if condition_type != "boolean":
             raise Exception("Condition expression in 'if' must be of type boolean")
+        
+        # Collect declared variables in each branch
+        then_declared = self.collect_declared_vars(node.then_branch)
+        else_declared = self.collect_declared_vars(node.else_branch) if node.else_branch else set()
+
+        # If both branches declare the same variables, define them in the current scope
+        common_vars = then_declared & else_declared
+        for var in common_vars:
+            self.symbol_table.define(var, None)  # Define in outer scope with unknown type for now
+
         self.check(node.then_branch)
         if node.else_branch:
             self.check(node.else_branch)
@@ -227,7 +237,8 @@ class SemanticChecker:
         # Check the type of the argument
         for arg in node.arguments:
             self.check(arg)  # just validate the argument, not comparing its type.
-        
+
+# ================================================ extra functions ================================================
     def check_for_infinite_recursion(self, node):
         if isinstance(node, Block):
             for stmt in node.statements:
@@ -244,4 +255,11 @@ class SemanticChecker:
                     for item in attr:
                         if isinstance(item, ASTNode):
                             self.check_for_infinite_recursion(item)
- 
+
+    def collect_declared_vars(self, block):
+        declared = set()
+        if isinstance(block, Block):
+            for stmt in block.statements:
+                if isinstance(stmt, VarDecl):
+                    declared.add(stmt.identifier.name)
+        return declared
