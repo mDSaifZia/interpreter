@@ -65,7 +65,8 @@ fn testMixIfElse(x, y) {
 fn testwhlle(a, b) {
     while (a < b) {
         a = a + 1;
+        print(a);
     }
 }
 
-var result = add2(x, y);
+var result = testwhlle(x, y);
