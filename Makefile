@@ -2,7 +2,7 @@ CC = gcc
 
 SRC = \
     ratsnake.c \
-    ir_compiler.c \
+    IR_compiler.c \
     vm/vm.c \
     vm/stackframe.c \
     hashmap/hashmap.c \
