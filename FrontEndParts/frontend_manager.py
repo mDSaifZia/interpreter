@@ -32,8 +32,9 @@ def lexical_analysis(source_code):
 def syntax_analysis(tokens):
     parser_obj = Parser(tokens) 
     ast = parser_obj.parse()    # produces an Abstract Syntax Tree (AST) from the list of Token objects
-    print("\nAST:")
-    print(ast)
+    # uncomment to debug
+    # print("\nAST:")
+    # print(ast)
     return ast
 
 def semantic_analysis(ast):

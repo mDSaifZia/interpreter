@@ -16,3 +16,9 @@ fn foo(a) {
 }
 
 foo(5);
+
+//Test null
+var new = NULL;
+y = NULL;
+
+y = "hr";

@@ -264,6 +264,9 @@ class Parser:
 
     def parse_factor(self):         # Parse a factor, which can be a literal, identifier, function call, or a parenthesized expression (Most basic unit of an expression)
         token = self.current_token()
+        if token.type == "KEYWORD" and token.value == "NULL":    # Check for null keyword
+            self.consume("KEYWORD", "NULL")
+            return Literal(None, "null")
         if token.type in ("INTEGER", "FLOAT", "STRING", "BOOLEAN"):    # Check for literals e.g. 5, 3.14, "hello", true/false
             self.consume(token.type)                                    # convert values to python objects for easier handling            
             match token.type:
