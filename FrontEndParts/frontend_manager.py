@@ -7,17 +7,17 @@ from custom_parser import Parser
 from custom_bytecode_generator import BytecodeGenerator
 
 #To run this file from proj dir: 
-# python FrontEndParts/frontend_manager.py -i testing/inputSourceCodeFiles/sourceCode[source code number].rtsk
+# python FrontEndParts/frontend_manager.py -i testing/inputSourceCodeFiles/sourceCode1.rtsk
 
 def readBytecodeFile(filepath):
     with open(filepath, "rb") as f:
         header = f.read(64)
-        # print("\n===================== Header =====================")
-        # print(header)
+        print("\n===================== Header =====================")
+        print(header)
 
-        # print("\n===================== Main exec and Func def bytecode =====================")
+        print("\n===================== Main exec and Func def bytecode =====================")
         remaining_code = f.read()
-        # print(remaining_code.decode('utf-8'))
+        print(remaining_code.decode('utf-8'))
 
 
 def lexical_analysis(source_code):
@@ -47,7 +47,7 @@ def semantic_analysis(ast):
 def generate_bytecode(ast, output_file):
     generator = BytecodeGenerator()
     generator.write_bytecode(ast, output_file)
-    # generator.write_textfile(ast, output_file_text)
+    # generator.write_textfile(ast, output_file)
 
 # ================================================ Main ================================================
 def main():
@@ -58,7 +58,7 @@ def main():
 
     inputfileName = args.input.split('\\')[-1].split('.')[0]  # get the file name without extension
     # output_file = f"{inputfileName}.bytecode"
-    # output_file_text = f"testing/outputText(forReference)/text{inputfileName[-1]}.txt"
+    # output_file = f"testing/outputText(forReference)/text{inputfileName[-1]}.txt"
     output_file = os.path.join(os.getcwd(), f"{inputfileName}.bytecode")
 
     # Read the source code from the input file.

@@ -86,12 +86,12 @@ class CallExpr(ASTNode):    # Specifically for function call expression
         return f"CallExpr({self.callee}, {self.arguments})"
 
 class Assignment(ASTNode):  # Assignment operation e.g. a = 5
-    def __init__(self, left, right):
+    def __init__(self, left, right, top_level_assignment=False):
         self.left = left
         self.right = right
-        self.top_level_assignment = False
+        self.top_level_assignment = top_level_assignment
     def __repr__(self):
-        return f"Assignment({self.left}, {self.right})"
+        return f"Assignment({self.left}, {self.right}, {self.top_level_assignment})"
     
 class FunctionDecl(ASTNode):
     def __init__(self, name, params, body):
@@ -112,3 +112,9 @@ class PrintStmt(ASTNode):
         self.expr = expr
     def __repr__(self):
         return f"PrintStmt({self.expr})"
+
+class InputStmt(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"InputStmt({self.expr})"

@@ -3,3 +3,16 @@ var x = (((( 3 +5) +1)*2)-1);
 
 var y = (3+2)+(1+(5+2));
 
+y =7;
+
+
+// Test input
+var message = "";
+input(message);
+
+fn foo(a) {
+    var b = "";
+    input(b);
+}
+
+foo(5);

@@ -14,7 +14,7 @@ class Lexer:
     def __init__(self, code):
         self.code = code
         self.line = 1
-        self.keywords = {"if", "else", "while", "return", "fn", "var", "loop", "from", "print"}
+        self.keywords = {"if", "else", "while", "return", "fn", "var", "loop", "from", "print", "input"}
         self.token_specification = [
             ('MANY_LINE_COMMENT', r'///(.*)///'),   # Greedy match for multi-line comments
             ('ONE_LINE_COMMENT',  r'//[^\n]*'),      # Match until newline only

@@ -187,7 +187,7 @@ class BytecodeGenerator:
             f.write("\n".encode("utf-8"))
             f.write(mainexec_inbytes)
             f.write(funcdef_inbytes)
-        # print(f"Bytecodes written to: {output_filepath}")
+        print(f"Bytecodes written to: {output_filepath}")
 
     def write_textfile(self, ast, output_filepath):
         # For debugging: write the bytecode to a text file also
@@ -198,7 +198,7 @@ class BytecodeGenerator:
             f.write(mainexec_bytecode_str)
             f.write("\n")
             f.write(funcdef_bytecode_str)
-        # print(f"Bytecodes written to: {output_filepath}")
+        print(f"Bytecodes written to: {output_filepath}")
 
     # =============================== AST traversal ===============================
     def visit(self, node):
@@ -227,7 +227,8 @@ class BytecodeGenerator:
             self.bytecodes.append("OP_SET_GLOBAL")
 
     def visit_Assignment(self, node):
-        self.visit(node.right)
+        if (node.right is not None):
+            self.visit(node.right)
         if self.in_function and self.locals and node.left.name in self.locals:  # Should check if variable is local or global
             idx = self.locals[node.left.name]
             self.bytecodes.append(f"LOCAL {idx}")
@@ -254,7 +255,7 @@ class BytecodeGenerator:
             case "str":
                 self.bytecodes.append(f"STR {len(node.value)} {node.value}")
             case "bool":
-                self.bytecodes.append(f"BOOL {"1" if node.value else "0"}")
+                self.bytecodes.append(f"BOOL {'1' if node.value else '0'}")
             case "null":
                 self.bytecodes.append("__NULL__")
             case _:
@@ -461,6 +462,6 @@ class BytecodeGenerator:
         exitloop_offset = self.compute_size(self.bytecodes[jmpif_index+1:])
         self.bytecodes[jmpif_index] = f"OP_JMPIF {exitloop_offset}"
 
-
-
-
+    def visit_InputStmt(self, node):
+        self.bytecodes.append("OP_INPUT")
+        self.visit(node.expr)
