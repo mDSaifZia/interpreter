@@ -2,4 +2,6 @@
 ratsnake
 .vscode/*
 testing/outputText(forReference)/*
-sourceCodeTEST.rtsk
+*.rtsk
+*.bytecode
+*.bin

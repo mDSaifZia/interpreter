@@ -56,6 +56,8 @@ int main(int argc, char const *argv[]) {
     VM *vm = initVM();
     run(vm, output_bin);
 
+    // Step 5: we could clean up the bytecode and binary but i'm lazy
+
     free(bytecode_file);
     free(output_bin);
     return 0;

@@ -254,7 +254,7 @@ class BytecodeGenerator:
             case "str":
                 self.bytecodes.append(f"STR {len(node.value)} {node.value}")
             case "bool":
-                self.bytecodes.append(f"BOOL {str(node.value)}")
+                self.bytecodes.append(f"BOOL {"1" if node.value else "0"}")
             case "null":
                 self.bytecodes.append("__NULL__")
             case _:
@@ -304,7 +304,7 @@ class BytecodeGenerator:
             self.bytecodes.append("OP_SUB")
         elif node.op == '!':
             self.visit(node.operand)
-            self.bytecodes.append("BOOL False")
+            self.bytecodes.append("BOOL 0")
             self.bytecodes.append("OP_EQ")
         else:
             raise Exception(f"Unknown unary operator {node.op}")

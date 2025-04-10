@@ -891,7 +891,7 @@ char* float_to_string(PrimitiveObject* obj) {
 
 char* bool_to_string(PrimitiveObject* obj) {
     bool_Object* boolObj = (bool_Object*)obj;
-    return strdup(boolObj->value ? "True" : "False");
+    return strdup(boolObj->value ? "true" : "false");
 }
 
 char* null_to_string(PrimitiveObject* obj) {

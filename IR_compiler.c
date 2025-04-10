@@ -112,8 +112,8 @@ int compile_ir(const char *input_path, const char *output_path) {
         return 1;
     }
 
-    printf("Opened input: %s\n", input_path);
-    printf("Opened output: %s\n", output_path);
+    // printf("Opened input: %s\n", input_path);
+    // printf("Opened output: %s\n", output_path);
 
     // Write placeholder header
     BytecodeHeader hdr = {0};
@@ -138,26 +138,26 @@ int compile_ir(const char *input_path, const char *output_path) {
             continue;
         }
 
-        printf(GREEN "[Line %d] Token: %s\n" WHITE, lineno, token);
+        // printf(GREEN "[Line %d] Token: %s\n" WHITE, lineno, token);
 
         if (strcmp(token, "INT") == 0) {
             char *arg = strtok(NULL, " \t\r\n");
             int64_t val = atoll(arg);
-            printf("  INT: %s %ld\n", token, val);
+            // printf("  INT: %s %ld\n", token, val);
             write_uint8(out, INT); byte_offset += 1;
             write_int64(out, val);  byte_offset += 8;
 
         } else if (strcmp(token, "FLOAT") == 0) {
             char *arg = strtok(NULL, " \t\r\n");
             double val = atof(arg);
-            printf("  FLOAT: %s %.8f\n", token, val);
+            // printf("  FLOAT: %s %.8f\n", token, val);
             write_uint8(out, FLOAT); byte_offset += 1;
             write_double(out, val);  byte_offset += 8;
 
         } else if (strcmp(token, "BOOL") == 0) {
             char *arg = strtok(NULL, " \t\r\n");
             int val = atoi(arg);
-            printf("  BOOL: %s %d\n", token, val);
+            // printf("  BOOL: %s %d\n", token, val);
             write_uint8(out, BOOL); byte_offset += 1;
             write_uint8(out, val);  byte_offset += 1;
 
@@ -169,7 +169,7 @@ int compile_ir(const char *input_path, const char *output_path) {
                 fprintf(stderr, "  Error: Missing length or value on line %d\n", lineno);
 
             } else {
-                printf("  %s len=%s val=%s\n", token, len_str, val);
+                // printf("  %s len=%s val=%s\n", token, len_str, val);
                 uint16_t len16 = atoi(len_str);
                 if (strcmp(token, "STR") == 0) {
                     write_uint8(out, STR);              byte_offset += 1;
@@ -187,22 +187,22 @@ int compile_ir(const char *input_path, const char *output_path) {
         } else if (strcmp(token, "LOCAL") == 0) {
             char *arg = strtok(NULL, " \t\r\n");
             uint16_t idx = atoi(arg);
-            printf("  LOCAL idx: %d\n", idx);
+            // printf("  LOCAL idx: %d\n", idx);
             write_uint8(out, LOCAL); byte_offset += 1;
             write_uint16(out, idx);  byte_offset += 2;
 
         } else if (strcmp(token, "OP_JMP") == 0 || strcmp(token, "OP_JMPIF") == 0) {
             char *arg = strtok(NULL, " \t\r\n");
             int32_t offset = atoi(arg);
-            printf("  %s offset: %d\n", token, offset);
-            printf("OP_JMP: %x, OP_JMPIF: %x\n",OP_JMP,OP_JMPIF);
+            // printf("  %s offset: %d\n", token, offset);
+            // printf("OP_JMP: %x, OP_JMPIF: %x\n",OP_JMP,OP_JMPIF);
             write_uint8(out, strcmp(token, "OP_JMP") == 0 ? OP_JMP : OP_JMPIF); byte_offset += 1;
             write_int32(out, offset); byte_offset += 4;
 
         } else if (strcmp(token, "NUMARGS") == 0 || strcmp(token, "NUMVARS") == 0) {
             char *arg = strtok(NULL, " \t\r\n");
             uint16_t count = atoi(arg);
-            printf("  %s count: %d\n", token, count);
+            // printf("  %s count: %d\n", token, count);
             write_uint16(out, count); byte_offset += 2;
             
         } else {
@@ -214,7 +214,7 @@ int compile_ir(const char *input_path, const char *output_path) {
                 if (strcmp(token, "OP_ENDFUNC") == 0) {
                     func_end = byte_offset+1;
                 }
-                printf("  Writing opcode: %s (%d)\n", token, op);
+                // printf("  Writing opcode: %s (%d)\n", token, op);
                 write_uint8(out, op); byte_offset += 1;
             } else {
                 fprintf(stderr, "Unknown token on line %d: %s\n", lineno, token);
@@ -225,7 +225,7 @@ int compile_ir(const char *input_path, const char *output_path) {
             }
         }
 
-        printf(" Byte offset: %ld\n", byte_offset);
+        // printf(" Byte offset: %ld\n", byte_offset);
         lineno++;
     }
 
@@ -246,11 +246,11 @@ int compile_ir(const char *input_path, const char *output_path) {
     fwrite(&hdr, sizeof(hdr), 1, out);
     fclose(out);
 
-    printf(GREEN "Patched header written:\n" WHITE);
-    printf("  execution_section_start = %lu\n", hdr.execution_section_start);
-    printf("  func_section_start      = %lu\n", hdr.func_section_start);
-    printf("  func_section_end        = %lu\n", hdr.func_section_end);
-    printf("  Compilation complete.\n");
+    // printf(GREEN "Patched header written:\n" WHITE);
+    // printf("  execution_section_start = %lu\n", hdr.execution_section_start);
+    // printf("  func_section_start      = %lu\n", hdr.func_section_start);
+    // printf("  func_section_end        = %lu\n", hdr.func_section_end);
+    // printf("  Compilation complete.\n");
 
     return 0;
 }
