@@ -5,11 +5,6 @@ var y = (3+2)+(1+(5+2));
 
 y =7;
 
-
-// Test input
-var message = "";
-input(message);
-
 fn foo(a) {
     var b = "";
     input(b);
@@ -22,3 +17,9 @@ var new = NULL;
 y = NULL;
 
 y = "hr";
+
+// Test input
+var text = NULL;
+text = input("pls enter:");
+var message = input("Enter your message here: ");
+

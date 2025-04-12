@@ -227,8 +227,7 @@ class BytecodeGenerator:
             self.bytecodes.append("OP_SET_GLOBAL")
 
     def visit_Assignment(self, node):
-        if (node.right is not None):
-            self.visit(node.right)
+        self.visit(node.right)
         if self.in_function and self.locals and node.left.name in self.locals:  # Should check if variable is local or global
             idx = self.locals[node.left.name]
             self.bytecodes.append(f"LOCAL {idx}")
@@ -463,5 +462,5 @@ class BytecodeGenerator:
         self.bytecodes[jmpif_index] = f"OP_JMPIF {exitloop_offset}"
 
     def visit_InputStmt(self, node):
-        self.bytecodes.append("OP_INPUT")
         self.visit(node.expr)
+        self.bytecodes.append("OP_INPUT")

@@ -64,8 +64,6 @@ class Parser:
                     return self.parse_return_stmt()
                 case "print":
                     return self.parse_print_stmt()
-                case "input":
-                    return self.parse_input_stmt()
         # Check for assignment statement: identifier followed by ASSIGN
         if token.type == "IDEN":
             next_token = self.peek()
@@ -307,6 +305,12 @@ class Parser:
             op = self.consume("ARITHMETIC", "-").value
             operand = self.parse_factor()
             return UnaryOp(op, operand)
+        elif token.type == "KEYWORD" and token.value == "input":    # Check for input builtin function
+            self.consume("KEYWORD", "input")
+            self.consume("DELIMITER", "(")
+            expr = self.parse_expression()
+            self.consume("DELIMITER", ")")
+            return InputStmt(PrintStmt(expr)) # Alwyas set as a print statement
         else:
             raise Exception(f"Unexpected token {token}")
         
@@ -343,11 +347,4 @@ class Parser:
         expr = self.parse_expression()
         self.consume("DELIMITER", ";")
         return ReturnStmt(expr)
-    
-    def parse_input_stmt(self):        # Parse an input statement
-        self.consume("KEYWORD", "input")
-        self.consume("DELIMITER", "(")
-        iden = self.parse_factor()
-        self.consume("DELIMITER", ")")
-        self.consume("DELIMITER", ";")
-        return InputStmt(Assignment(iden, None, True)) # Always set top level assignment as true
+        
