@@ -518,11 +518,11 @@ void run(VM *vm, const char *bytecode_file) {
         break;
     }
 
-      case OP_PRINT: {
+    case OP_PRINT: {
         StackEntry value = pop(vm);
         if (value.entry_type == PRIMITIVE_OBJ) {
             PrimitiveObject* obj = (PrimitiveObject*) value.value;
-            if (obj->__str__) { // for primitives implemented this should never be NULL, might even cause issues if str is ""
+            if (obj->__str__) { // for primitives implemented this should never be NULL, might even cause issues if str is "" But will keep for safety
                 char* repr = obj->__str__(obj);
                 printf("%s\n", repr);
                 free(repr);  // since we allocated memory to the representation when calling __str__
@@ -531,6 +531,24 @@ void run(VM *vm, const char *bytecode_file) {
             }
         } else {
             printf("<non-primitive value cannot be printed>\n");
+        }
+        break;
+    }
+
+    case OP_INPUT: {
+        char buffer[1024];
+        if (fgets(buffer, sizeof(buffer), stdin)) {
+            // Strip newline
+            size_t len = strlen(buffer);
+            if (len > 0 && buffer[len - 1] == '\n') {
+                buffer[len - 1] = '\0';
+            }
+    
+            // Always wrap as string primitive
+            push(vm, new_str(buffer), PRIMITIVE_OBJ);
+        } else {
+            printf("Error: Failed to read input.\n");
+            push(vm, get_constant(vm, _NULL_, 0), PRIMITIVE_OBJ);
         }
         break;
     }
