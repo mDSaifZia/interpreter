@@ -23,3 +23,5 @@ var text = NULL;
 text = input("pls enter:");
 var message = input("Enter your message here: ");
 
+input("Testin testing 123");
+
