@@ -169,9 +169,12 @@ class SemanticChecker:
         return self.symbol_table.lookup(node.name)
 
     def visit_IfStmt(self, node):
-        condition_type = self.check(node.condition)
-        if condition_type != "boolean":
-            raise Exception("Condition expression in 'if' must be of type boolean")
+        # Skipping condition type checking
+        self.check(node.condition)
+        
+        # condition_type = self.check(node.condition)
+        # if condition_type != "boolean":
+        #     raise Exception("Condition expression in 'if' must be of type boolean")
         
         # Collect declared variables in each branch
         then_declared = self.collect_declared_vars(node.then_branch)
