@@ -6,6 +6,7 @@
 Ratsnake's architecture is based on a basic stack based language implementation where Objects and primitives are pushed to a stack and popped when an  operator instruction is read in. All **types** in Ratsnake are treated as either **Objects** or **Primitives**, and operator tokens are actually function/ "method" calls of these PseudoObjects. Ratsnake, also uses a scope structure similar to Local-Enclosing-Global-Builtin (LGEB) scoping, where we have dropped the "enclosing" scope as advanced objects have yet to be implemented.
 
 Visualisation of Ratsnake's architechture:
+
 The pipeline follows:
 >`source.rtsk` → (Frontend Manager (python)) →  `AST` → (IR Compiler (C)) → `source.bytecode` → (Binary Compiler (C)) → `source.rtskbin` → (VM (C)) → code execution
 Anatomy of PrimitiveObject:
