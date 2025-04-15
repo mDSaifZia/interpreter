@@ -105,7 +105,7 @@ Below is the list of OPCODES of Ratsnake. Source code is first parsed and then t
 | OPCODE |Description|
 |--|--|
 |OP_JMP| Jumps from the current position by an offset|
-|OP_JMPIF| Pops a value from stack and jumps from the current offset if the value is truthy|
+|OP_JMPIF| Pops a value from stack and jumps from the current offset if the value is not truthy|
 #### Primitive Types
 | OPCODE |Description|
 |--|--|
