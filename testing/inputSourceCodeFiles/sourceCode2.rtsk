@@ -19,7 +19,7 @@ fn testLoop(a, b) {
         // Double the value of i
         var doubled = i * 2;
     }
-    return False;
+    return false;
 }
 
 fn testIfElse(x, y) {
@@ -57,6 +57,7 @@ fn testMixIfElse(x, y) {
         var diff = 0;
     } else {
         var status = "low";
+        var diff = 0;
     }
 
     return diff;

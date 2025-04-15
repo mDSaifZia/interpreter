@@ -1,3 +1,4 @@
+from types import NoneType
 from custom_ast_nodes import *
 
 class SymbolTable:
@@ -86,7 +87,7 @@ class SemanticChecker:
         self.visit_Block(node.body)
 
         # Check the function body for infinite recursion
-        self.check_for_infinite_recursion(node.body)
+        # self.check_for_infinite_recursion(node.body)
 
         # Reset the current function
         self.current_function = None
@@ -128,6 +129,8 @@ class SemanticChecker:
             return "string"
         elif type(node.value) == bool:
             return "boolean"
+        elif type(node.value) == NoneType:
+            return "NULL"
         raise Exception(f"Unsupported literal type: {type(node.value)}")
 
     def visit_BinaryOp(self, node):
@@ -191,8 +194,8 @@ class SemanticChecker:
 
     def visit_WhileStmt(self, node):
         condition_type = self.check(node.condition)
-        if condition_type != "boolean":
-            raise Exception("Condition expression in 'while' must be of type boolean")
+        # if condition_type != "boolean":
+        #     raise Exception("Condition expression in 'while' must be of type boolean")
         self.check(node.body)
 
     def visit_LoopStmt(self, node):
@@ -242,22 +245,22 @@ class SemanticChecker:
             self.check(arg)  # just validate the argument, not comparing its type.
 
 # ================================================ extra functions ================================================
-    def check_for_infinite_recursion(self, node):
-        if isinstance(node, Block):
-            for stmt in node.statements:
-                if isinstance(stmt, ReturnStmt):
-                    if isinstance(stmt.expr, CallExpr):
-                        if stmt.expr.callee.name == self.current_function:
-                            raise Exception(f"Infinite Recursion Error: Function '{self.current_function}' calls itself without a base case")
-                self.check_for_infinite_recursion(stmt)
-        elif isinstance(node, ASTNode):
-            for attr in vars(node).values():
-                if isinstance(attr, ASTNode):
-                    self.check_for_infinite_recursion(attr)
-                elif isinstance(attr, list):
-                    for item in attr:
-                        if isinstance(item, ASTNode):
-                            self.check_for_infinite_recursion(item)
+    # def check_for_infinite_recursion(self, node):
+    #     if isinstance(node, Block):
+    #         for stmt in node.statements:
+    #             if isinstance(stmt, ReturnStmt):
+    #                 if isinstance(stmt.expr, CallExpr):
+    #                     if stmt.expr.callee.name == self.current_function:
+    #                         raise Exception(f"Infinite Recursion Error: Function '{self.current_function}' calls itself without a base case")
+    #             self.check_for_infinite_recursion(stmt)
+    #     elif isinstance(node, ASTNode):
+    #         for attr in vars(node).values():
+    #             if isinstance(attr, ASTNode):
+    #                 self.check_for_infinite_recursion(attr)
+    #             elif isinstance(attr, list):
+    #                 for item in attr:
+    #                     if isinstance(item, ASTNode):
+    #                         self.check_for_infinite_recursion(item)
 
     def collect_declared_vars(self, block):
         declared = set()
