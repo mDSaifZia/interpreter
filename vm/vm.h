@@ -53,6 +53,11 @@ typedef enum {
     OP_BOR,      // Bitwise OR [1 byte]
     OP_BAND,     // Bitwise AND [1 byte]
 
+    // OPDCODE logical operators
+    OP_LOGICAL_AND,
+    OP_LOGICAL_OR,
+    OP_LOGICAL_NOT,
+
     // OPCODE local variables (SYNTAX: OP (NO ARG)) (I may remove these)
     OP_GET_LOCAL,  // Get local variable [1 byte]
     OP_SET_LOCAL,  // Set local variable [1 byte]

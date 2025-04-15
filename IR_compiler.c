@@ -78,22 +78,28 @@ int map_opcode(const char *token) {
     if (strcmp(token, "OP_GEQ") == 0) return OP_GEQ;
     if (strcmp(token, "OP_LT") == 0) return OP_LT;
     if (strcmp(token, "OP_LEQ") == 0) return OP_LEQ;
+    if (strcmp(token, "OP_LOGICAL_AND") == 0) return OP_LOGICAL_AND;
+    if (strcmp(token, "OP_LOGICAL_OR") == 0) return OP_LOGICAL_OR;
+    if (strcmp(token, "OP_LOGICAL_NOT") == 0) return OP_LOGICAL_NOT;
     return -1;
 }
 
-void write_id_or_str(FILE *out, const char *token, const char *len_str, const char *val) {
-    uint16_t len = (uint16_t)atoi(len_str);
-    if (strcmp(token, "STR") == 0) {
-        write_uint8(out, STR);
-        uint32_t len32 = (uint32_t)len;
-        fwrite(&len32, sizeof(uint32_t), 1, out);
-        fwrite(val, sizeof(char), len, out);
-    } else {
-        write_uint8(out, ID); // for both ID and IDFUNC
-        write_uint16(out, len);
-        fwrite(val, sizeof(char), len, out);
-    }
-}
+// void write_id_or_str(FILE *out, const char *token, const char *len_str, const char *val) {
+//     uint16_t len = (uint16_t)atoi(len_str);
+//     if (strcmp(token, "STR") == 0) {
+//         write_uint8(out, STR);
+//         uint32_t len32 = (uint32_t)len;
+//         // if (len32 == 0) {
+//         //     printf(" writing 0 length string\n");
+//         // }
+//         fwrite(&len32, sizeof(uint32_t), 1, out);
+//         fwrite(val, sizeof(char), len, out);
+//     } else {
+//         write_uint8(out, ID); // for both ID and IDFUNC
+//         write_uint16(out, len);
+//         fwrite(val, sizeof(char), len, out);
+//     }
+// }
 
 #define GREEN "\033[0;32m"
 #define WHITE "\033[0m"
@@ -165,9 +171,9 @@ int compile_ir(const char *input_path, const char *output_path) {
             char *len_str = strtok(NULL, " \t\r\n");
             char *val = strtok(NULL, "\n");
 
-            if (!len_str || !val) {
+            if (!len_str) {
                 fprintf(stderr, "  Error: Missing length or value on line %d\n", lineno);
-
+                exit(EXIT_FAILURE);
             } else {
                 // printf("  %s len=%s val=%s\n", token, len_str, val);
                 uint16_t len16 = atoi(len_str);

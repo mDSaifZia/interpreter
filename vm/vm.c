@@ -116,6 +116,7 @@ opcode to get JMP offset JMPIF -> read 4 bytes after opcode to get JMP offset
  * vm scope */
 int is_truthy(PrimitiveObject *obj) {
   if (!obj)
+    // printf("string value is: %s\n", ((str_Object *)obj)->value[0]);
     return 0; // Null is false
 
   switch (obj->type) {
@@ -129,6 +130,7 @@ int is_truthy(PrimitiveObject *obj) {
     return ((float_Object *)obj)->value != 0.0 ? 1 : 0;
 
   case TYPE_str: // truthy so long as it is not an empty string
+    // printf("string value is: %s\n", ((str_Object *)obj)->value[0]);
     return ((str_Object *)obj)->value[0] != '\0' ? 1 : 0;
 
   case TYPE_Null: // always false
@@ -380,7 +382,9 @@ void run(VM *vm, const char *bytecode_file) {
       vm->bytecode_ip =
           (uint64_t *)((uint8_t *)vm->bytecode_ip +
                        sizeof(uint32_t)); // Move past length field
-
+      // if (length == 0) {
+      //   printf("string length: %d\n", length);
+      // }
       char *str_value = malloc(length + 1);
       memcpy(str_value, vm->bytecode_ip, length); // Copy string data
       str_value[length] = '\0';                   // Null-terminate
@@ -627,6 +631,28 @@ void run(VM *vm, const char *bytecode_file) {
         printf("Error: Invalid types for Binary Right Shift operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
         return;
       }
+      break;
+    }
+
+    case OP_LOGICAL_AND:
+      StackEntry condition_b = pop(vm);
+      StackEntry condition_a = pop(vm);
+      int result = is_truthy((PrimitiveObject *)condition_a.value) && is_truthy((PrimitiveObject *)condition_b.value);
+      push(vm, get_constant(vm, BOOL, result), PRIMITIVE_OBJ);
+      break;
+
+    case OP_LOGICAL_OR: {
+      StackEntry condition_b = pop(vm);
+      StackEntry condition_a = pop(vm);
+      int result = is_truthy((PrimitiveObject *)condition_a.value) || is_truthy((PrimitiveObject *)condition_b.value);
+      push(vm, get_constant(vm, BOOL, result), PRIMITIVE_OBJ);
+      break;
+    }
+
+    case OP_LOGICAL_NOT: {
+      StackEntry a = pop(vm);
+      int result = !is_truthy((PrimitiveObject *)a.value);
+      push(vm, get_constant(vm, BOOL, result), PRIMITIVE_OBJ);
       break;
     }
 

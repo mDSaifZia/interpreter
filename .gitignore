@@ -6,3 +6,4 @@ testing/outputText(forReference)/*
 *.rtsk
 *.bytecode
 *.bin
+*.rtskbin

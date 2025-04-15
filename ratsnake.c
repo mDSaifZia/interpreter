@@ -41,8 +41,8 @@ int main(int argc, char const *argv[]) {
     }
     strcpy(output_bin, source_file);
     dot = strrchr(output_bin, '.');
-    if (dot) strcpy(dot, ".bin");
-    else strcat(output_bin, ".bin");
+    if (dot) strcpy(dot, ".rtskbin");
+    else strcat(output_bin, ".rtskbin");
 
     // Step 3: Compile .bytecode to binary .bin for vm to run
     if (compile_ir(bytecode_file, output_bin) != 0) {

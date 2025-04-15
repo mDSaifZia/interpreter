@@ -304,8 +304,9 @@ class BytecodeGenerator:
             self.bytecodes.append("OP_SUB")
         elif node.op == '!':
             self.visit(node.operand)
-            self.bytecodes.append("BOOL 0")
-            self.bytecodes.append("OP_EQ")
+            self.bytecodes.append("OP_LOGICAL_NOT")
+            # self.bytecodes.append("BOOL 0")
+            # self.bytecodes.append("OP_EQ")
         else:
             raise Exception(f"Unknown unary operator {node.op}")
 

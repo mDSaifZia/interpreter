@@ -158,15 +158,20 @@ class SemanticChecker:
 
     def visit_UnaryOp(self, node):
         operand_type = self.check(node.operand)
-        if node.op == '!':
-            if operand_type != "boolean":
-                raise Exception(f"Unary Error: Cannot apply '!' to type '{operand_type}'. Expected boolean.")
-            return "boolean"
-        elif node.op == '-':
+        if node.op == '-':
             if operand_type in {"int", "float"}:
                 return operand_type
             else:
                 raise Exception(f"Unary Error: Cannot apply '-' to type '{operand_type}'")
+        # if node.op == '!':
+        #     if operand_type != "boolean":
+        #         raise Exception(f"Unary Error: Cannot apply '!' to type '{operand_type}'. Expected boolean.")
+        #     return "boolean"
+        # elif node.op == '-':
+        #     if operand_type in {"int", "float"}:
+        #         return operand_type
+        #     else:
+        #         raise Exception(f"Unary Error: Cannot apply '-' to type '{operand_type}'")
 
     def visit_Identifier(self, node):
         return self.symbol_table.lookup(node.name)
