@@ -431,7 +431,8 @@ void run(VM *vm, const char *bytecode_file) {
                             b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
         } else {
-        printf("Error: Invalid types for ADD operation.\n"); // just disallowing other types of additions first but it can be implemented
+          printf("Error: Invalid types for ADD operation.\n"); // just disallowing other types of additions first but it can be implemented
+          return;
         }
         break;
     }
@@ -475,6 +476,7 @@ void run(VM *vm, const char *bytecode_file) {
             }
         } else {
             printf("Error: Invalid types for SUB operation.\n");
+            return;
         }
         break;
     }
@@ -489,12 +491,13 @@ void run(VM *vm, const char *bytecode_file) {
                             b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
         } else {
-        printf("Error: Invalid types for MUL operation.\n"); // just disallowing
-                                                                // other types of
-                                                                // multiplication
-                                                                // first but it can
-                                                                // be implemented
-        }
+          printf("Error: Invalid types for MUL operation.\n"); // just disallowing
+                                                                  // other types of
+                                                                  // multiplication
+                                                                  // first but it can
+                                                                  // be implemented
+          return;
+          }
         break;
     }
 
@@ -506,11 +509,12 @@ void run(VM *vm, const char *bytecode_file) {
             ((PrimitiveObject *)a.value)->div(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
         } else {
-        printf("Error: Invalid types for DIV operation.\n"); // just disallowing
-                                                                // other types of
-                                                                // multiplication
-                                                                // first but it can
-                                                                // be implemented
+          printf("Error: Invalid types for DIV operation.\n"); // just disallowing
+                                                                  // other types of
+                                                                  // Division
+                                                                  // first but it can
+                                                                  // be implemented
+          return;
         }
         break;
     }
@@ -519,20 +523,111 @@ void run(VM *vm, const char *bytecode_file) {
         StackEntry b = pop(vm);
         StackEntry a = pop(vm);
         if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
-        PrimitiveObject *result = ((PrimitiveObject *)a.value)->mod(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
+            PrimitiveObject *result = ((PrimitiveObject *)a.value)->mod(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
         if (result == NULL) {
             printf("Error: Invalid types for MOD operation.\n");
             return;
         }
         push(vm, result, PRIMITIVE_OBJ);
         } else {
-        printf("Error: Invalid types for MOD operation.\n"); // just disallowing
-                                                                // other types of
-                                                                // multiplication
-                                                                // first but it can
-                                                                // be implemented
+            printf("Error: Invalid types for MOD operation.\n"); // just disallowing
+                                                                    // other types of
+                                                                    // Modulo
+                                                                    // first but it can
+                                                                    // be implemented
+            return;
         }
         break;
+    }
+
+    case OP_BAND: {
+      StackEntry b = pop(vm);
+      StackEntry a = pop(vm);
+      if ((a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) &&
+          (((PrimitiveObject *)a.value)->type == TYPE_int && ((PrimitiveObject *)b.value)->type == TYPE_int)) {
+          PrimitiveObject *result = ((int_Object *)a.value)->bwAND(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
+          if (result == NULL) {
+              printf("Error: Invalid types for Binary AND operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+              return;
+          }
+          push(vm, result, PRIMITIVE_OBJ);
+      } else {
+        printf("Error: Invalid types for Binary AND operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+        return;
+      }
+      break;
+    }
+    
+    case OP_BOR: {
+      StackEntry b = pop(vm);
+      StackEntry a = pop(vm);
+      if ((a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) &&
+          (((PrimitiveObject *)a.value)->type == TYPE_int && ((PrimitiveObject *)b.value)->type == TYPE_int)) {
+          PrimitiveObject *result = ((int_Object *)a.value)->bwOR(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
+          if (result == NULL) {
+              printf("Error: Invalid types for Binary OR operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+              return;
+          }
+          push(vm, result, PRIMITIVE_OBJ);
+      } else {
+        printf("Error: Invalid types for Binary OR operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+        return;
+      }
+      break;
+    }
+
+    case OP_BXOR: {
+      StackEntry b = pop(vm);
+      StackEntry a = pop(vm);
+      if ((a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) &&
+          (((PrimitiveObject *)a.value)->type == TYPE_int && ((PrimitiveObject *)b.value)->type == TYPE_int)) {
+          PrimitiveObject *result = ((int_Object *)a.value)->bwXOR(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
+          if (result == NULL) {
+              printf("Error: Invalid types for Binary XOR operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+              return;
+          }
+          push(vm, result, PRIMITIVE_OBJ);
+      } else {
+        printf("Error: Invalid types for Binary XOR operation. (Expecting [type: INT] BinaryOp [Type: int])\n"); 
+        return;
+      }
+      break;
+    }
+    
+    case OP_BLSHIFT: {
+      StackEntry b = pop(vm);
+      StackEntry a = pop(vm);
+      if ((a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) &&
+          (((PrimitiveObject *)a.value)->type == TYPE_int && ((PrimitiveObject *)b.value)->type == TYPE_int)) {
+          PrimitiveObject *result = ((int_Object *)a.value)->bwLSHIFT(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
+          if (result == NULL) {
+              printf("Error: Invalid types for Binary Binary Left Shift operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+              return;
+          }
+          push(vm, result, PRIMITIVE_OBJ);
+      } else {
+        printf("Error: Invalid types for Binary Left Shift operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+        return;
+      }
+      break;
+    }
+
+    case OP_BRSHIFT: {
+      StackEntry b = pop(vm);
+      StackEntry a = pop(vm);
+      if ((a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) &&
+          (((PrimitiveObject *)a.value)->type == TYPE_int && ((PrimitiveObject *)b.value)->type == TYPE_int)) {
+          PrimitiveObject *result = ((int_Object *)a.value)->bwRSHIFT(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
+          if (result == NULL) {
+              printf("Error: Invalid types for Binary AND operation.\n");
+              return;
+          }
+          push(vm, result, PRIMITIVE_OBJ);
+      } else {
+        printf("Error: Invalid types for Binary Right Shift operation. (Expecting [type: INT] BinaryOp [Type: int])\n");
+        return;
+      }
+      break;
     }
 
     case OP_PRINT: {
@@ -548,6 +643,7 @@ void run(VM *vm, const char *bytecode_file) {
             }
         } else {
             printf("<non-primitive value cannot be printed>\n");
+            return;
         }
         break;
     }
