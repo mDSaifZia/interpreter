@@ -41,7 +41,7 @@ def semantic_analysis(ast):
     checker = SemanticChecker()
     try:
         checker.check(ast)
-        print("Semantic Analysis: PASS")
+        # print("Semantic Analysis: PASS")
         return True
     except Exception as e:
         print(f"Semantic Analysis: FAIL ({e})")
