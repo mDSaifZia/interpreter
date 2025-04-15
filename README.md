@@ -76,55 +76,75 @@ struct PrimitiveObject {
 | Object **Object**| Unimplemented but is meant to represent all advanced object types and classes. |
 ****
 Below is the list of OPCODES of Ratsnake. Source code is first parsed and then transpiled into this intermediate representation *(before finally being compiled into the custom binary format)*.
+#### Arithmetic
 | OPCODE |Description|
 |--|--|
-|#### Arithmetic|-----|
 |OP_ADD| Calls add function pointer of PrimitiveObjects and Objects|
 |OP_MUL| Calls mul function pointer of PrimitiveObjects and Objects|
 |OP_SUB| Calls sub function pointer of PrimitiveObjects and Objects|
 |OP_DIV| Calls div function pointer of PrimitiveObjects and Objects|
 |OP_MOD|Pops 2 Objects from stack and calls mod "method"|
-|#### Identifier opcodes|-----|
+#### Identifier opcodes
+| OPCODE |Description|
+|--|--|
 |OP_GET_GLOBAL| Pops an id from stack and pushes the object assigned to that id onto stack| 
 |OP_SET_GLOBAL| Pops an object and an id from stack and assigns id to the object in global table|
 |OP_GET_LOCAL|Pops a local id from stack and gets the assigned value|
 |OP_SET_LOCAL|Pops an object and id from the stack and sets the assigned value|
 |LOCAL|Local identifier with identifier index|
 |ID| Global identifier with identifier value|
-|#### Function opcodes|-----|
+#### Function opcodes
+| OPCODE |Description|
+|--|--|
 |OP_CALL| Pops an id from stack and attempts to call the function id|  
 |OP_RETURN| Pushes the final return of a function onto the stack and destroys stackframe.|
 |OP_HALT| Halts the VM|
-|#### Control flow|-----|
+#### Control flow
+| OPCODE |Description|
+|--|--|
 |OP_JMP| Jumps from the current position by an offset|
 |OP_JMPIF| Pops a value from stack and jumps from the current offset if the value is truthy|
-|#### Primitive Types|-----|
+#### Primitive Types
+| OPCODE |Description|
+|--|--|
 |INT| Creates a primitive int with specified value|
 |FLOAT| Creates a primitive float with specified value|
 |BOOL| Creates a primitive bool **true/false**|  
 |STR| Creates a primitive string with string value|
 |\_NULL\_| Creates a primitive NULL|
-|#### Function and Class flags|-----|
+#### Function and Class flags
+| OPCODE |Description|
+|--|--|
 |OP_FUNCDEF|Flag for the start of function definition|
 |OP_ENDFUNC|Flag for the end of function definition|
 |OP_CLASSDEF|Flag for start of class definition *Not implemented*|
 |OP_ENDCLASS|Flag for end of class definition *Not implemented*|
-|#### Bitwise Operators|-----|
+#### Bitwise Operators
+| OPCODE |Description|
+|--|--|
 |OP_BLSHIFT|Pops 2 primitive ints from stack and performs LSHIFT|
 |OP_BRSHIFT|Pops 2 primitive ints from stack and performs RSHIFT|
 |OP_BXOR|Pops 2 primitive ints from stack and performs XOR|
 |OP_BOR|Pops 2 primitive ints from stack and performs OR|
 |OP_BAND|Pops 2 primitive ints from stack and performs AND|
-|#### Uninary Operators|-----|
+#### Uninary Operators
+| OPCODE |Description|
+|--|--|
 |OP_LOGICAL_AND|Pops 2 Objects from stack and performs logical AND on their truthiness|
 |OP_LOGICAL_OR|Pops 2 Objects from stack and performs logical OR on their truthiness|
 |OP_LOGICAL_NOT|Pops 1 Object from stack and performs logical NOT on their truthiness|
-|#### I/O|-----|
+#### I/O
+| OPCODE |Description|
+|--|--|
 |OP_PRINT|Pops an object from stack and calls its str "method" and prints it to stdout|
 |OP_INPUT|Waits for an input from stdin pushes a str onto stack|
-|#### Stack OPCODES|-----|
+#### Stack OPCODES
+| OPCODE |Description|
+|--|--|
 |OP_POP|Pops a value from stack|
-|#### Comparison Operators|-----|
+#### Comparison Operators
+| OPCODE |Description|
+|--|--|
 |OP_NEQ|Pops 2 Objects from stack and checks for inequality|
 |OP_EQ|Pops 2 Objects from stack and checks for equality|
 |OP_GEQ|Pops 2 Objects from stack and checks for greater than equal|
