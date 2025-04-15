@@ -67,6 +67,9 @@ Below is the list of OPCODES of Ratsnake. Source code is first parsed and then t
 |OP_BXOR|Pops 2 primitive ints from stack and performs XOR|
 |OP_BOR|Pops 2 primitive ints from stack and performs OR|
 |OP_BAND|Pops 2 primitive ints from stack and performs AND|
+|OP_LOGICAL_AND|Pops 2 Objects from stack and performs logical AND on their truthiness|
+|OP_LOGICAL_OR|Pops 2 Objects from stack and performs logical OR on their truthiness|
+|OP_LOGICAL_NOT|Pops 1 Object from stack and performs logical NOT on their truthiness|
 |OP_GET_LOCAL|Pops a local id from stack and gets the assigned value|
 |OP_SET_LOCAL|Pops an object and id from the stack and sets the assigned value|
 |LOCAL|Local identifier|
@@ -169,11 +172,22 @@ make
 This will produce a ***ratsnake*** executable file if compiled on Linux or a ***ratsnake.exe*** executable if compiled on Windows (Inside the project root directory).
 
 ## Running Ratsnake vm
+Below is the general help command to run ratsnake. It requires the path/name of the source code file (.rtsk) and has 2 optional flags that can be inserted in any order.
+```
+./ratsnake source_code.rtsk [-keep_ir] [-keep_bin]
+```
+-keep_ir: keeps the .bytecode file after vm finishes
+
+-keep_bin: keeps the .rtskbin file after vm finishes
+
+**Examples**
 **Powershell**
 ```Powershell
-./ratsnake source_code.rtsk
+./ratsnake source_code.rtsk -keep_ir
+// runs the source_code file and retains ONLY the intermediate representation bytecode file after execution.
 ```
 **Linux**
 ```Bash
 ./ratsnake source_code.rtsk
+// runs the source_code file and does not retain the rtsk binary or the intermediate representation files after execution.
 ```
