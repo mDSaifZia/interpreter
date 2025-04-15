@@ -42,8 +42,10 @@ def semantic_analysis(ast):
     try:
         checker.check(ast)
         print("Semantic Analysis: PASS")
+        return True
     except Exception as e:
         print(f"Semantic Analysis: FAIL ({e})")
+        return False
 
 def generate_bytecode(ast, output_file):
     generator = BytecodeGenerator()
@@ -70,7 +72,7 @@ def main():
 
     ast = syntax_analysis(tokens)   # Syntax analysis
 
-    semantic_analysis(ast)  # Semantic analysis
+    if not semantic_analysis(ast): return# Semantic analysis
 
     generate_bytecode(ast, output_file) # Bytecode generation
 
