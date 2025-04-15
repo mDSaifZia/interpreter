@@ -8,7 +8,8 @@ Ratsnake's architecture is based on a basic stack based language implementation 
 Visualisation of Ratsnake's architechture:
 
 The pipeline follows:
->`source.rtsk` → (Frontend Manager (python)) →  `AST` → `source.bytecode` → (IR Compiler (C)) → `source.rtskbin` → (VM (C)) → code execution
+>`source.rtsk` → (Frontend Manager (python)) →  `AST` → `source.bytecode` → (IR Compiler (C)) → `source.rtskbin` → (VM (C)) → `code execution`
+
 Anatomy of PrimitiveObject:
 ```C
 typedef enum {
