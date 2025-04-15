@@ -447,34 +447,34 @@ void run(VM *vm, const char *bytecode_file) {
         // Check if b is of type INT or FLOAT
         if ((b_obj->type == TYPE_int || b_obj->type == TYPE_float)) {
 
-            // Create a copy of b to negate
-            PrimitiveObject *negated_b;
+                // Create a copy of b to negate
+                PrimitiveObject *negated_b;
 
-            if (b_obj->type == TYPE_int) {
-            // Create a negated copy of the int
-            int64_t negated_value = -(((int_Object *)b_obj)->value);
-            negated_b = (PrimitiveObject *)new_int(vm, negated_value);
-            } else { // TYPE_float
-            // Create a negated copy of the float
-            double negated_value = -(((float_Object *)b_obj)->value);
-            negated_b = (PrimitiveObject *)new_float(negated_value);
+                if (b_obj->type == TYPE_int) {
+                // Create a negated copy of the int
+                int64_t negated_value = -(((int_Object *)b_obj)->value);
+                negated_b = (PrimitiveObject *)new_int(vm, negated_value);
+                } else { // TYPE_float
+                // Create a negated copy of the float
+                double negated_value = -(((float_Object *)b_obj)->value);
+                negated_b = (PrimitiveObject *)new_float(negated_value);
+                }
+
+                /*printf("%ld\n", ((int_Object *)a_obj)->value);*/
+                /*printf("%ld\n", ((int_Object *)negated_b)->value);*/
+                // Now add a and negated_b
+                PrimitiveObject *result = a_obj->add(a_obj, negated_b);
+                /*printf("%ld\n", ((int_Object *)result)->value);*/
+                /*printf("%d\n", result->type);*/
+                push(vm, result, PRIMITIVE_OBJ);
+
+                // If negated_b isn't in the constant pool, we should free it
+                // This would require tracking if it came from the constant pool
+            } else {
+                printf("Error: Subtraction only supported between numeric types.\n");
             }
-
-            /*printf("%ld\n", ((int_Object *)a_obj)->value);*/
-            /*printf("%ld\n", ((int_Object *)negated_b)->value);*/
-            // Now add a and negated_b
-            PrimitiveObject *result = a_obj->add(a_obj, negated_b);
-            /*printf("%ld\n", ((int_Object *)result)->value);*/
-            /*printf("%d\n", result->type);*/
-            push(vm, result, PRIMITIVE_OBJ);
-
-            // If negated_b isn't in the constant pool, we should free it
-            // This would require tracking if it came from the constant pool
         } else {
-            printf("Error: Subtraction only supported between numeric types.\n");
-        }
-        } else {
-        printf("Error: Invalid types for SUB operation.\n");
+            printf("Error: Invalid types for SUB operation.\n");
         }
         break;
     }
@@ -503,13 +503,30 @@ void run(VM *vm, const char *bytecode_file) {
         StackEntry a = pop(vm);
         if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
         PrimitiveObject *result =
-            ((PrimitiveObject *)a.value)
-                ->div(((PrimitiveObject *)a.value),
-                        ((PrimitiveObject *)
-                            b.value)); // cast back to original values
+            ((PrimitiveObject *)a.value)->div(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
         push(vm, result, PRIMITIVE_OBJ);
         } else {
-        printf("Error: Invalid types for MUL operation.\n"); // just disallowing
+        printf("Error: Invalid types for DIV operation.\n"); // just disallowing
+                                                                // other types of
+                                                                // multiplication
+                                                                // first but it can
+                                                                // be implemented
+        }
+        break;
+    }
+
+    case OP_MOD: {
+        StackEntry b = pop(vm);
+        StackEntry a = pop(vm);
+        if (a.entry_type == PRIMITIVE_OBJ && b.entry_type == PRIMITIVE_OBJ) {
+        PrimitiveObject *result = ((PrimitiveObject *)a.value)->mod(((PrimitiveObject *)a.value), ((PrimitiveObject *)b.value)); // cast back to original values
+        if (result == NULL) {
+            printf("Error: Invalid types for MOD operation.\n");
+            return;
+        }
+        push(vm, result, PRIMITIVE_OBJ);
+        } else {
+        printf("Error: Invalid types for MOD operation.\n"); // just disallowing
                                                                 // other types of
                                                                 // multiplication
                                                                 // first but it can

@@ -13,7 +13,7 @@ TARGET = ratsnake
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) -o $@ $(SRC) -lm
+	$(CC) -o $@ $(SRC) -lm -O2
 
 clean:
 	rm -f $(TARGET)

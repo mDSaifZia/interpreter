@@ -7,7 +7,7 @@ int compile_ir(const char *input_path, const char *output_path); // forward decl
 
 int main(int argc, char const *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <source_file.rs>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <source_file.rtsk>\n", argv[0]);
         return 1;
     }
 

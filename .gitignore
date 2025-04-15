@@ -1,6 +1,7 @@
 *.exe
 ratsnake
 .vscode/*
+time_program.ps1
 testing/outputText(forReference)/*
 *.rtsk
 *.bytecode
