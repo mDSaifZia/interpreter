@@ -1,0 +1,28 @@
+// Test for relational operators return boolean
+
+var a = 10;
+var b = 5;
+
+// Direct relational ops in var declarations
+var isEqual = a == b;
+var isNotEqual = a != b;
+var isLess = a < b;
+var isLessEqual = a <= b;
+var isGreater = a > b;
+var isGreaterEqual = a >= b;
+
+// Use in if-statement
+if (a != b) {
+    print("Not equal");
+}
+
+// Use in while-loop
+while (a > b) {
+    a = a - 1;
+}
+
+// Use in loop with relational bounds
+loop i from (1, 5) {
+    var check = i < 3;
+    print(check);
+}

@@ -1,2 +1,4 @@
 test_primitives.c
+test.c
 *.exe
+test

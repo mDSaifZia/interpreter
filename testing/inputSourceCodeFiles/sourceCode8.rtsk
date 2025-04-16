@@ -1,0 +1,108 @@
+// Test simple functions and their scope
+var d = 4;
+var e = 5;
+
+fn f(a,b) {
+    var d = 5;
+    a = b +5;
+    var c = 2;
+    // d will refer to local d
+    return a + b+ c + d;
+    
+}
+
+fn g(a,b) {
+    a = b +5;
+    var c = 2;
+    // d will refer to global d
+    return a + b+ c + d;
+    
+}
+
+fn z(a) {
+    if (a == 0) {
+        return 0;
+    } else if (a == 1) {
+        return 1000;
+    } else {
+        return a + z(a-1);
+    }
+}
+
+fn compare(a, b) {
+    if (a < b) {
+        return 1000;
+    } else {
+        return 2000;
+    }
+}
+
+fn fib(n) {
+    if (n <= 1) {
+        return n;
+    } else {
+        return fib(n-2) + fib(n-1);
+    }
+}
+
+fn fac(n) {
+    if (n==0) {
+        return 1;
+    }
+    return n * fac(n-1);
+}
+
+fn wow(a) {
+    if (a == 1) {
+        return a;
+    } else {
+        return a + 1000;
+    }
+}
+
+fn testloop(a) {
+    loop i from(1,10) {
+        a = a + i;
+    }
+    return a;
+}
+
+fn testloopwhile(a) {
+    var res = 0;
+    while (a >= 0) {
+        a = a - 1;
+        res = res + 1;
+        print(res);
+    }
+    return res;
+}
+
+fn greet(name) {
+    return "hello there, " + name + "!";
+}
+
+fn print_tree(a) {
+    print(" "*(a) + "*");
+    loop i from(0,a) {
+        print(" "*(a-i) + "X"*(i*2+1));
+    }
+    var trunk = " "*(a-2) + "|  |";
+    print(trunk);
+    print(trunk);
+    print(" ");
+}
+
+testloopwhile(10);
+
+print_tree(20);
+
+var name = "wowza";
+
+var test = greet(name);  
+
+var test2 = fib(4*e);
+
+print("test:");
+print(test);
+print("test2:");
+print(test2);

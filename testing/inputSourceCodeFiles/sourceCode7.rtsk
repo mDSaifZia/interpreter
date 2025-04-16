@@ -1,0 +1,27 @@
+// Test complex arithmetic
+var x = (((( 3 +5) +1)*2)-1);
+
+var y = (3+2)+(1+(5+2));
+
+y =7;
+
+fn foo(a) {
+    var b = "";
+    input(b);
+}
+
+foo(5);
+
+//Test null
+var new = NULL;
+y = NULL;
+
+y = "hr";
+
+// Test input
+var text = NULL;
+text = input("pls enter:");
+var message = input("Enter your message here: ");
+
+input("Testin testing 123");
+

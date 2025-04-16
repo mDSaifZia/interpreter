@@ -1,0 +1,73 @@
+/// This is a multi-line comment
+ spanning multiple lines.///
+// End of multi-line comment 
+// Function test
+
+var x = 10;
+var y = 20;
+
+fn add1(a, b) {
+    a = a + b;
+}
+
+fn add2(a, b) {
+    return a + b;
+}
+
+fn testLoop(a, b) {
+    loop i from(a, b) {
+        // Double the value of i
+        var doubled = i * 2;
+    }
+    return false;
+}
+
+fn testIfElse(x, y) {
+    if (x > y) {
+        var status = "high";    
+    } else if (x==y) { 
+        var status = "mid"; 
+    } else {
+        var status = "low";
+    }
+    return status;
+}
+
+fn testDoubleIfElse(x, y) {
+    if (x > y) {
+        var status = "high";
+        var diff = x - y;
+    } else if (x == y) {
+        var status = "mid";
+        var diff = 0;
+    } else {
+        var status = "low";
+        var diff = y - x;
+    }
+
+    return status;
+}
+
+fn testMixIfElse(x, y) {
+    if (x > y) {
+        var status = "high";
+        var diff = x - y;
+    } else if (x == y) {
+        var status = "mid";
+        var diff = 0;
+    } else {
+        var status = "low";
+        var diff = 0;
+    }
+
+    return diff;
+}
+
+fn testwhlle(a, b) {
+    while (a < b) {
+        a = a + 1;
+        print(a);
+    }
+}
+
+var result = testwhlle(x, y);

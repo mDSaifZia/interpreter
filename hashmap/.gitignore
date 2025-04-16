@@ -1,0 +1,4 @@
+test_hashmap.c
+*.o
+*.exe
+test

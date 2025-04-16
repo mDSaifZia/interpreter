@@ -1,0 +1,46 @@
+// Test Case 1: Uninitialized Values
+var y = x + 9;   // x is not defined yet
+
+// Test Case 2: Scope Errors
+fn test(a, b) {
+    var x = 9;
+}
+x = 10;   // x is out of scope
+
+// Test Case 3: Function Argument Mismatch
+fn add(a, b) {
+    return a + b;
+}
+
+var result = add(5);   // Missing one argument
+
+// Test Case 4: Control Flow Error (Unreachable Code)
+fn add2(a, b) {
+    return a + b;
+    a = b + 9;   // This line is not allowed
+}
+
+// Test Case 5: Infinite Recursion
+fn foo() {
+    return foo();   // Infinite recursion not allowed
+}
+
+// Test Case 6: While Condition Type Error
+var x = 5;
+while (x) {   // x is an int, not a boolean
+    x = x - 1;
+}
+
+// Test Case 7: Loop Control Modification Error
+loop i from (1, 10) {
+    i = 100;   // i is the control variable
+}
+
+// Test Case 8: Division by Zero
+var x = 10 / 0;   // Division by zero
+
+// Test Case 9: Invalid Function Parameter Type
+fn add(a, b) {
+    return a + b;
+}
+var result = add(5, 3.14);   // Error: Argument 2 of 'add' expects type 'int', but got 'float'
