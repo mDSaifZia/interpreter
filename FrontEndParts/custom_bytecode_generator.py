@@ -465,3 +465,19 @@ class BytecodeGenerator:
     def visit_InputStmt(self, node):
         self.visit(node.expr)
         self.bytecodes.append("OP_INPUT")
+    
+    def visit_ParseInt(self, node):
+        self.visit(node.expr)
+        self.bytecodes.append("OP_PARSEINT")
+
+    def visit_ParseFloat(self, node):
+        self.visit(node.expr)
+        self.bytecodes.append("OP_PARSEFLOAT")
+
+    def visit_ParseBool(self, node):
+        self.visit(node.expr)
+        self.bytecodes.append("OP_PARSEBOOL")
+
+    def visit_ParseStr(self, node):
+        self.visit(node.expr)
+        self.bytecodes.append("OP_PARSESTR")
