@@ -291,6 +291,7 @@ Interpreter
 ## Compilation and requirements
 Ratsnake requires python3 (reccomended python version >3.10) to run it's frontend parser. If you do not have python you can installed it from the python official website:
 >[click to download python](https://www.python.org/downloads/)
+
 Also requires GCC (was compiled with gcc 13.2.0) and a compiler version of C99 to compile as it makes use of dynamic stack allocation, to install gcc run the following commands:
 >**Linux** (Ubuntu/Debian/WSL based distributions) Bash
 >```Bash
