@@ -312,7 +312,9 @@ class BytecodeGenerator:
 
     def visit_ExpressionStmt(self, node):
         self.visit(node.expr)
-        if (node.expr.__class__.__name__ == "CallExpr" or node.expr.__class__.__name__ == "InputStmt"):
+        if (node.expr.__class__.__name__ == "CallExpr" or node.expr.__class__.__name__ == "InputStmt" 
+            or node.expr.__class__.__name__ == "ParseInt" or node.expr.__class__.__name__ == "ParseFloat"
+            or node.expr.__class__.__name__ == "ParseBool" or node.expr.__class__.__name__ == "ParseStr"):
             # Parent node of CallExpr is ExpressionStmt if its return value is not used.
             # Hence, if the expression is a function call, we need to add an OP_POP to discard the result at the end to prevent stack overflow.
             self.bytecodes.append("OP_POP")
