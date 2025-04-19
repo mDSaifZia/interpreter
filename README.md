@@ -250,30 +250,41 @@ Interpreter
 # C source files:
 **vm.c / vm.h**
 > VM source files, contains the main vm logic, structs and functions.
+
 **hashmap.c / hashmap.h**
-> Hashmap implmentation used in vm.c. 
+> Hashmap implmentation used in vm.c.
+
 **stackframe.c / stackframe.h**
 > Implementation of function frame structs and helper functions used in vm.c.
+
 **ratsnake.c**
 > Ratsnake launcher, pipelines, wraps and uses all other source files.
 **core_primitives.c / core_primitives.h**
 > Source files for the implementation of the primitive datatypes.
+
 **advanced_primitives.c / advanced_primitives.h**
 > Source files for the implementation of advanced objects. *(not implemented)*
+
 **IR_compiler.c**
 > Source file for compiling the bytecode file (.bytecode) output of the python frontend into vm readble binary file (.rtskbin).
+
 ****
 # Python source files
 **custom_ast_nodes.py**
 > Source file for definitions and implementation of AST tree nodes.
+
 **custom_bytecode_generator.py**
 > Source file that generates the .bytecode file from the AST.
+
 **custom_lexer.py**
 > Source file for the lexer for tokenising the Ratsnake source code. (.rtsk)
+
 **custom_parser.py**
 > Source file for parsing the tokens.
+
 **custom_semantic_checker.py**
 > Sourcefile for checking the semantics and syntax of Ratsnake source code.
+
 **frontend_manager.py**
 > Sourcefile that manages, pipelines and wraps the usage of all other python source files.
 
