@@ -246,8 +246,8 @@ Interpreter
 ├── ratsnake.c
 └── README.md
 ```
-## Source Files
-# C source files:
+# Source Files
+## C source files:
 **vm.c / vm.h**
 > VM source files, contains the main vm logic, structs and functions.
 
@@ -269,7 +269,7 @@ Interpreter
 > Source file for compiling the bytecode file (.bytecode) output of the python frontend into vm readble binary file (.rtskbin).
 
 ****
-# Python source files
+## Python source files
 **custom_ast_nodes.py**
 > Source file for definitions and implementation of AST tree nodes.
 
