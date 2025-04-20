@@ -311,6 +311,30 @@ class Parser:
             expr = self.parse_expression()
             self.consume("DELIMITER", ")")
             return InputStmt(PrintStmt(expr)) # Alwyas set as a print statement
+        elif token.type == "KEYWORD" and token.value == "int":    # Check for Parse int builtin function
+            self.consume("KEYWORD", "int")
+            self.consume("DELIMITER", "(")
+            expr = self.parse_expression()
+            self.consume("DELIMITER", ")")
+            return ParseInt(expr)
+        elif token.type == "KEYWORD" and token.value == "float":    # Check for Parse int builtin function
+            self.consume("KEYWORD", "float")
+            self.consume("DELIMITER", "(")
+            expr = self.parse_expression()
+            self.consume("DELIMITER", ")")
+            return ParseFloat(expr)
+        elif token.type == "KEYWORD" and token.value == "str":    # Check for Parse int builtin function
+            self.consume("KEYWORD", "str")
+            self.consume("DELIMITER", "(")
+            expr = self.parse_expression()
+            self.consume("DELIMITER", ")")
+            return ParseStr(expr)
+        elif token.type == "KEYWORD" and token.value == "bool":    # Check for Parse int builtin function
+            self.consume("KEYWORD", "bool")
+            self.consume("DELIMITER", "(")
+            expr = self.parse_expression()
+            self.consume("DELIMITER", ")")
+            return ParseBool(expr)
         else:
             raise Exception(f"Unexpected token {token}")
         

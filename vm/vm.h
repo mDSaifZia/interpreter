@@ -75,7 +75,12 @@ typedef enum {
     OP_GEQ, // [1 byte]
     OP_GT, // [1 byte]
     OP_LEQ,// [1 byte]
-    OP_LT // [1 byte]
+    OP_LT, // [1 byte]
+
+    OP_PARSEINT,
+    OP_PARSESTR,
+    OP_PARSEFLOAT,
+    OP_PARSEBOOL
 } OpCode;
 
 

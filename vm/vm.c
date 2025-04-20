@@ -656,6 +656,111 @@ void run(VM *vm, const char *bytecode_file) {
       break;
     }
 
+
+
+    case OP_PARSEINT:
+    case OP_PARSEFLOAT:
+    case OP_PARSEBOOL:
+    case OP_PARSESTR: {
+        StackEntry input = pop(vm);
+
+        if (input.entry_type != PRIMITIVE_OBJ) {
+            printf("Error: PARSE opcodes require a primitive object.\n");
+            break;
+        }
+
+        PrimitiveObject *obj = (PrimitiveObject *)input.value;
+
+        switch (instruction) {
+        case OP_PARSEINT: {
+            int64_t parsed = 0;
+
+            switch (obj->type) {
+            case TYPE_int:
+                parsed = ((int_Object *)obj)->value;
+                break;
+            case TYPE_float:
+                parsed = (int64_t)((float_Object *)obj)->value;
+                break;
+            case TYPE_bool:
+                parsed = ((bool_Object *)obj)->value;
+                break;
+            case TYPE_str: {
+                char *end;
+                parsed = strtoll(((str_Object *)obj)->value, &end, 10);
+                if (*end != '\0') {
+                    printf("Error: Invalid characters in string during int parse.\n");
+                    return;
+                }
+                break;
+            }
+            default:
+                printf("Error: Cannot parse this type as int.\n");
+                return;
+                break;
+            }
+
+            push(vm, new_int(vm, parsed), PRIMITIVE_OBJ);
+            break;
+        }
+
+        case OP_PARSEFLOAT: {
+            double parsed = 0.0;
+
+            switch (obj->type) {
+            case TYPE_int:
+                parsed = (double)((int_Object *)obj)->value;
+                break;
+            case TYPE_float:
+                parsed = ((float_Object *)obj)->value;
+                break;
+            case TYPE_bool:
+                parsed = (double)((bool_Object *)obj)->value;
+                break;
+            case TYPE_str: {
+                char *end;
+                parsed = strtod(((str_Object *)obj)->value, &end);
+                if (*end != '\0') {
+                    printf("Error: Invalid characters in string during float parse.\n");
+                    return;
+                }
+                break;
+            }
+            default:
+                printf("Error: Cannot parse this type as float.\n");
+                return;
+                break;
+            }
+
+            push(vm, new_float(parsed), PRIMITIVE_OBJ);
+            break;
+        }
+
+        case OP_PARSEBOOL: {
+            int parsed = is_truthy(obj);  // Use VM's internal truthy logic
+            push(vm, get_constant(vm, BOOL, parsed), PRIMITIVE_OBJ);
+            break;
+        }
+
+        case OP_PARSESTR: {
+      
+          if (!obj->__str__) {
+              printf("Error: Object of type %d does not implement __str__ method.\n", obj->type);
+              return;
+              break;
+          }
+      
+          char *stringified = obj->__str__(obj);  
+      
+          push(vm, new_str(stringified), PRIMITIVE_OBJ);
+      
+          free(stringified);  
+          break;
+      }
+      }
+      break;
+    }
+
     case OP_PRINT: {
         StackEntry value = pop(vm);
         if (value.entry_type == PRIMITIVE_OBJ) {

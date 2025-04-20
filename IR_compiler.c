@@ -81,6 +81,10 @@ int map_opcode(const char *token) {
     if (strcmp(token, "OP_LOGICAL_AND") == 0) return OP_LOGICAL_AND;
     if (strcmp(token, "OP_LOGICAL_OR") == 0) return OP_LOGICAL_OR;
     if (strcmp(token, "OP_LOGICAL_NOT") == 0) return OP_LOGICAL_NOT;
+    if (strcmp(token, "OP_PARSEINT") == 0) return OP_PARSEINT;
+    if (strcmp(token, "OP_PARSEBOOL") == 0) return OP_PARSEBOOL;
+    if (strcmp(token, "OP_PARSESTR") == 0) return OP_PARSESTR;
+    if (strcmp(token, "OP_PARSEFLOAT") == 0) return OP_PARSEFLOAT;
     return -1;
 }
 

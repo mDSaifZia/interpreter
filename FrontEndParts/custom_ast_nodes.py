@@ -118,3 +118,27 @@ class InputStmt(ASTNode):
         self.expr = expr
     def __repr__(self):
         return f"InputStmt({self.expr})"
+    
+class ParseInt(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"ParseInt({self.expr})"
+
+class ParseFloat(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"ParseFloat({self.expr})"
+    
+class ParseStr(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"ParseStr({self.expr})"
+    
+class ParseBool(ASTNode):
+    def __init__(self, expr):
+        self.expr = expr
+    def __repr__(self):
+        return f"ParseBool({self.expr})"
